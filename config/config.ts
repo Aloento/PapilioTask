@@ -1,12 +1,13 @@
 // https://umijs.org/config/
-import { defineConfig } from '@umijs/max';
-import { join } from 'path';
-import defaultSettings from './defaultSettings';
-import proxy from './proxy';
+import { defineConfig } from "@umijs/max";
+import "@umijs/preset-umi";
+import { join } from "path";
+import defaultSettings from "./defaultSettings";
+import proxy from "./proxy";
 
-import routes from './routes';
+import routes from "./routes";
 
-const { REACT_APP_ENV = 'dev' } = process.env;
+const { REACT_APP_ENV = "dev" } = process.env;
 
 export default defineConfig({
   /**
@@ -40,7 +41,7 @@ export default defineConfig({
   theme: {
     // 如果不想要 configProvide 动态设置主题需要把这个设置为 default
     // 只有设置为 variable， 才能使用 configProvide 动态设置主色调
-    'root-entry-name': 'variable',
+    "root-entry-name": "variable",
   },
   /**
    * @name moment 的国际化配置
@@ -77,7 +78,7 @@ export default defineConfig({
    * @name layout 插件
    * @doc https://umijs.org/docs/max/layout-menu
    */
-  title: 'Ant Design Pro',
+  title: "Ant Design Pro",
   layout: {
     locale: true,
     ...defaultSettings,
@@ -88,8 +89,8 @@ export default defineConfig({
    * @doc https://umijs.org/docs/max/moment2dayjs
    */
   moment2dayjs: {
-    preset: 'antd',
-    plugins: ['duration'],
+    preset: "antd",
+    plugins: ["duration"],
   },
   /**
    * @name 国际化插件
@@ -97,7 +98,7 @@ export default defineConfig({
    */
   locale: {
     // default zh-CN
-    default: 'zh-CN',
+    default: "zh-CN",
     antd: true,
     // default true, when it is true, will use `navigator.language` overwrite default
     baseNavigator: true,
@@ -126,10 +127,10 @@ export default defineConfig({
    */
   headScripts: [
     // 解决首次加载时白屏的问题
-    { src: '/scripts/loading.js', async: true },
+    { src: "/scripts/loading.js", async: true },
   ],
   //================ pro 插件配置 =================
-  presets: ['umi-presets-pro'],
+  presets: ["umi-presets-pro"],
   /**
    * @name openAPI 插件的配置
    * @description 基于 openapi 的规范生成serve 和mock，能减少很多样板代码
@@ -140,20 +141,21 @@ export default defineConfig({
       requestLibPath: "import { request } from '@umijs/max'",
       // 或者使用在线的版本
       // schemaPath: "https://gw.alipayobjects.com/os/antfincdn/M%24jrzTTYJN/oneapi.json"
-      schemaPath: join(__dirname, 'oneapi.json'),
+      schemaPath: join(__dirname, "oneapi.json"),
       mock: false,
     },
     {
       requestLibPath: "import { request } from '@umijs/max'",
-      schemaPath: 'https://gw.alipayobjects.com/os/antfincdn/CA1dOm%2631B/openapi.json',
-      projectName: 'swagger',
+      schemaPath:
+        "https://gw.alipayobjects.com/os/antfincdn/CA1dOm%2631B/openapi.json",
+      projectName: "swagger",
     },
   ],
   mock: {
-    include: ['mock/**/*', 'src/pages/**/_mock.ts'],
+    include: ["mock/**/*", "src/pages/**/_mock.ts"],
   },
   mfsu: {
-    strategy: 'normal',
+    strategy: "normal",
   },
   esbuildMinifyIIFE: true,
   requestRecord: {},

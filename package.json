@@ -56,6 +56,7 @@
     "@types/react-dom": "^18.2.18",
     "@types/react-helmet": "^6.1.11",
     "@umijs/max": "^4.1.0",
+    "@umijs/preset-umi": "^4.4.8",
     "cross-env": "^7.0.3",
     "express": "^4.18.2",
     "mockjs": "^1.1.0",
