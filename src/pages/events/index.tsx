@@ -1,51 +1,48 @@
-import { fetchEventList } from './service';
 import {
   ColumnHeightOutlined,
-  ExclamationCircleOutlined,
   PlusOutlined,
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import { ModalForm } from '@ant-design/pro-components';
 import {
   Button,
-  Card,
-  Checkbox,
   Col,
-  DatePicker,
-  Divider,
   Dropdown,
-  Flex,
-  Form,
   Input,
   Menu,
-  Modal,
   Pagination,
   Row,
-  Select,
   Space,
   Table,
   Tag,
   Tooltip,
   Typography,
 } from 'antd';
+import { SizeType } from 'antd/es/config-provider/SizeContext';
 import React, { useEffect, useMemo, useState } from 'react';
-import { history } from 'umi';
+import { useNavigate } from 'react-router-dom';
+import ColumnSettingModal from './components/ColumnSettingModal';
+import CreateEventModal from './components/CreateEventModal';
+import NotificationCard from './components/NotificationCard';
+import TodaySchedule from './components/TodaySchedule';
+import { fetchEventList } from './service';
+import { ColumnItem, EventItem, ScheduleItem } from './types';
 
-const { Text, Link, Title } = Typography;
-const { RangePicker } = DatePicker;
-const { TextArea } = Input;
+const { Title } = Typography;
 
+// 主页面组件
 const EventSchedulePage: React.FC = () => {
+  const navigate = useNavigate();
   const [columnModalVisible, setColumnModalVisible] = useState(false);
-  const [tableSize, setTableSize] = useState<'default' | 'middle' | 'small'>('middle');
+  const [tableSize, setTableSize] = useState<SizeType>('middle');
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [isEventModalVisible, setIsEventModalVisible] = useState(false);
 
-  const [tableData, setTableData] = useState<any[]>([]);
+  const [tableData, setTableData] = useState<EventItem[]>([]);
   const [searchValue, setSearchValue] = useState('');
-  const [filteredData, setFilteredData] = useState<any[]>([]);
+  const [filteredData, setFilteredData] = useState<EventItem[]>([]);
 
+  // 获取事件列表数据
   useEffect(() => {
     fetchEventList().then((res) => {
       setTableData(res);
@@ -53,7 +50,8 @@ const EventSchedulePage: React.FC = () => {
     });
   }, []);
 
-  const getInitialColumns = () => [
+  // 定义表格列
+  const getInitialColumns = (): ColumnItem[] => [
     {
       title: 'Event Number',
       dataIndex: 'eventNumber',
@@ -64,9 +62,9 @@ const EventSchedulePage: React.FC = () => {
       title: 'Event Name',
       dataIndex: 'eventName',
       key: 'eventName',
-      render: (text: string, record: any) => (
+      render: (text: string, record: EventItem) => (
         <a
-          onClick={() => history.push(`/events/eventdetail/${record.key}`)}
+          onClick={() => navigate(`/events/eventdetail/${record.key}`)}
           style={{ color: '#1677ff' }}
         >
           {text}
@@ -113,7 +111,6 @@ const EventSchedulePage: React.FC = () => {
         </>
       ),
     },
-
     {
       title: 'Status',
       dataIndex: 'status',
@@ -156,7 +153,8 @@ const EventSchedulePage: React.FC = () => {
     Record<string, 'left' | 'right' | undefined>
   >({});
 
-  const scheduleData = [
+  // 今日日程数据
+  const scheduleData: ScheduleItem[] = [
     {
       key: '1',
       title: 'The curse of revision - Hermione',
@@ -173,61 +171,19 @@ const EventSchedulePage: React.FC = () => {
     },
   ];
 
+  // 刷新表格数据
   const handleRefresh = () => setTableData([...tableData]);
 
+  // 处理表格密度变更
   const handleDensityChange = ({ key }: { key: string }) => {
-    setTableSize(key as 'default' | 'middle' | 'small');
+    setTableSize(key as SizeType);
   };
 
-  const renderColumnSettingItem = (col: any) => (
-    <div key={col.key} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-      <span style={{ cursor: 'grab', marginRight: 8, color: '#ccc' }}>⋮⋮</span>
-      <Checkbox
-        checked={visibleColumnKeys.includes(col.key)}
-        onChange={(e) => {
-          const checked = e.target.checked;
-          setVisibleColumnKeys((prev) =>
-            checked ? [...prev, col.key] : prev.filter((k) => k !== col.key),
-          );
-        }}
-      >
-        {col.title}
-      </Checkbox>
-      <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
-        <Tooltip title="固定在列首">
-          <Button
-            size="small"
-            type={columnFixedState[col.key] === 'left' ? 'primary' : 'text'}
-            icon={<span style={{ fontSize: 12 }}>⤒</span>}
-            onClick={() =>
-              setColumnFixedState((prev) => ({
-                ...prev,
-                [col.key]: prev[col.key] === 'left' ? undefined : 'left',
-              }))
-            }
-          />
-        </Tooltip>
-        <Tooltip title="固定在列尾">
-          <Button
-            size="small"
-            type={columnFixedState[col.key] === 'right' ? 'primary' : 'text'}
-            icon={<span style={{ fontSize: 12 }}>⤓</span>}
-            onClick={() =>
-              setColumnFixedState((prev) => ({
-                ...prev,
-                [col.key]: prev[col.key] === 'right' ? undefined : 'right',
-              }))
-            }
-          />
-        </Tooltip>
-      </div>
-    </div>
-  );
-
+  // 处理表格列的显示和固定状态
   const displayedColumns = useMemo(() => {
-    const left: any[] = [],
-      right: any[] = [],
-      normal: any[] = [];
+    const left: ColumnItem[] = [],
+      right: ColumnItem[] = [],
+      normal: ColumnItem[] = [];
     columns.forEach((col) => {
       if (!visibleColumnKeys.includes(col.key)) return;
       const fixed = columnFixedState[col.key];
@@ -237,54 +193,60 @@ const EventSchedulePage: React.FC = () => {
       else normal.push(newCol);
     });
     return [...left, ...normal, ...right];
-  }, [visibleColumnKeys, columnFixedState]);
+  }, [visibleColumnKeys, columnFixedState, columns]);
 
+  // 密度调整菜单
   const densityMenu = (
-    <Menu onClick={handleDensityChange} selectedKeys={[tableSize]}>
+    <Menu onClick={handleDensityChange} selectedKeys={[tableSize!]}>
       <Menu.Item key="default">默认</Menu.Item>
       <Menu.Item key="middle">中等</Menu.Item>
       <Menu.Item key="small">紧凑</Menu.Item>
     </Menu>
   );
 
+  // 创建新事件
+  const handleCreateEvent = (values: any) => {
+    const newKey = Date.now();
+    const newEventNumber = `EVT-${1000 + tableData.length + 1}`;
+
+    const newItem: EventItem = {
+      key: newKey,
+      eventNumber: newEventNumber,
+      eventName: values.title || 'Untitled',
+      assignees: values.assignees?.join(', ') || '',
+      timeframe: values.timeframe
+        ? `${values.timeframe[0].format('YYYY/MM/DD')} - ${values.timeframe[1].format(
+          'YYYY/MM/DD',
+        )}`
+        : '',
+      labels: values.labels || [],
+      status: values.status?.length > 0 ? values.status : ['Pending'],
+    };
+
+    setTableData((prev) => {
+      const updated = [newItem, ...prev];
+      setFilteredData(updated);
+      return updated;
+    });
+    setIsEventModalVisible(false);
+  };
+
+  // 搜索事件
+  const handleSearch = (value: string) => {
+    const lower = value.toLowerCase();
+    const filtered = tableData.filter((item) =>
+      item.eventName.toLowerCase().includes(lower),
+    );
+    setFilteredData(filtered);
+  };
+
   return (
     <div style={{ padding: 24 }}>
       {tableData.length > 0 && (
-        <Card
-          bordered
-          style={{ backgroundColor: '#f6ffed', borderColor: '#b7eb8f', marginBottom: 16 }}
-        >
-          <Text type="success">
-            <ExclamationCircleOutlined style={{ marginRight: 8 }} />
-            One of your tasks is about to expire, the project is called{' '}
-            <strong>{tableData[0].eventName}</strong>,{' '}
-            <Link onClick={() => history.push(`/events/eventdetail/${tableData[0].key}`)}>
-              click to jump!
-            </Link>
-          </Text>
-        </Card>
+        <NotificationCard data={tableData[0]} />
       )}
 
-      <Card title="Today's Schedule" style={{ marginBottom: 24 }}>
-        {scheduleData.map((item) => (
-          <Flex vertical gap={12} key={item.key} style={{ padding: 12 }}>
-            <Col span={24}>
-              <Text strong>{item.title}</Text>
-              <Text style={{ marginLeft: 8, color: '#888' }}>{item.time}</Text>
-              {item.urgent && (
-                <Tag color="red" style={{ marginLeft: 8 }}>
-                  Urgent
-                </Tag>
-              )}
-              <div>
-                <Link onClick={() => history.push(`/events/eventdetail/${item.key}`)}>
-                  {item.url}
-                </Link>
-              </div>
-            </Col>
-          </Flex>
-        ))}
-      </Card>
+      <TodaySchedule data={scheduleData} />
 
       <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
         <Col>
@@ -339,192 +301,26 @@ const EventSchedulePage: React.FC = () => {
             style={{ width: 200 }}
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            onSearch={(value) => {
-              const lower = value.toLowerCase();
-              const filtered = tableData.filter((item) =>
-                item.eventName.toLowerCase().includes(lower),
-              );
-              setFilteredData(filtered);
-            }}
+            onSearch={handleSearch}
           />
         </Col>
       </Row>
 
-      <ModalForm
-        title="列设置"
-        open={columnModalVisible}
-        onOpenChange={setColumnModalVisible}
-        submitter={false}
-        modalProps={{ destroyOnClose: true }}
-      >
-        <div style={{ padding: 12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-            <Checkbox
-              checked={visibleColumnKeys.length === columns.length}
-              indeterminate={
-                visibleColumnKeys.length > 0 && visibleColumnKeys.length < columns.length
-              }
-              onChange={(e) => {
-                const checked = e.target.checked;
-                setVisibleColumnKeys(checked ? columns.map((col) => col.key) : []);
-              }}
-            >
-              列展示
-            </Checkbox>
-            <Link
-              onClick={() => {
-                setVisibleColumnKeys(columns.map((col) => col.key));
-                setColumnFixedState({});
-              }}
-            >
-              重置
-            </Link>
-          </div>
-          <Divider style={{ margin: '8px 0' }} />
-          {['left', undefined, 'right'].map((fixedType) => {
-            const titleMap = {
-              left: '固定在左侧',
-              undefined: '不固定',
-              right: '固定在右侧',
-            } as const;
+      <ColumnSettingModal
+        visible={columnModalVisible}
+        onClose={() => setColumnModalVisible(false)}
+        columns={columns}
+        visibleColumnKeys={visibleColumnKeys}
+        setVisibleColumnKeys={setVisibleColumnKeys}
+        columnFixedState={columnFixedState}
+        setColumnFixedState={setColumnFixedState}
+      />
 
-            return (
-              <React.Fragment key={String(fixedType)}>
-                {columns.some(
-                  (col) =>
-                    columnFixedState[col.key] === fixedType ||
-                    (!columnFixedState[col.key] && fixedType === undefined),
-                ) && (
-                  <>
-                    <Divider style={{ margin: '8px 0' }} />
-                    <Text type="secondary" style={{ fontSize: 12 }}>
-                      {titleMap[fixedType]}
-                    </Text>
-                    {columns.map((col) =>
-                      columnFixedState[col.key] === fixedType ||
-                      (!columnFixedState[col.key] && fixedType === undefined)
-                        ? renderColumnSettingItem(col)
-                        : null,
-                    )}
-                  </>
-                )}
-              </React.Fragment>
-            );
-          })}
-        </div>
-      </ModalForm>
-
-      <Modal
-        title="Create New Event"
-        open={isEventModalVisible}
+      <CreateEventModal
+        visible={isEventModalVisible}
         onCancel={() => setIsEventModalVisible(false)}
-        footer={null}
-        destroyOnClose
-      >
-        <Form
-          layout="vertical"
-          onFinish={(values) => {
-            const newKey = Date.now();
-            const newEventNumber = `EVT-${1000 + tableData.length + 1}`;
-
-            const newItem = {
-              key: newKey,
-              eventNumber: newEventNumber,
-              eventName: values.title || 'Untitled',
-              assignees: values.assignees?.join(', ') || '',
-              timeframe: values.timeframe
-                ? `${values.timeframe[0].format('YYYY/MM/DD')} - ${values.timeframe[1].format(
-                    'YYYY/MM/DD',
-                  )}`
-                : '',
-              labels: values.labels || [],
-              status: values.status?.length > 0 ? values.status : ['Pending'],
-            };
-
-            setTableData((prev) => {
-              const updated = [newItem, ...prev];
-              setFilteredData(updated); // ✅ 确保 UI 展示更新
-              return updated;
-            });
-            setIsEventModalVisible(false);
-          }}
-        >
-          <Row gutter={32}>
-            <Col span={16}>
-              <Form.Item
-                label="Add a title"
-                name="title"
-                rules={[{ required: true, message: 'Please input the title!' }]}
-              >
-                <Input placeholder="Title" />
-              </Form.Item>
-
-              <Form.Item label="Add a description" name="description">
-                <TextArea placeholder="Type your description here..." rows={8} />
-              </Form.Item>
-
-              <Space>
-                <Button onClick={() => setIsEventModalVisible(false)}>Cancel</Button>
-                <Button type="primary" htmlType="submit">
-                  Create
-                </Button>
-              </Space>
-            </Col>
-
-            <Col span={8}>
-              <Form.Item label="Assignees" name="assignees">
-                <Select
-                  mode="multiple"
-                  placeholder="Select"
-                  style={{ width: '100%' }}
-                  options={[
-                    { label: 'Tom', value: 'Tom' },
-                    { label: 'Hermione', value: 'Hermione' },
-                    { label: 'Harry', value: 'Harry' },
-                  ]}
-                />
-              </Form.Item>
-              <Form.Item label="Labels" name="labels">
-                <Select
-                  mode="multiple"
-                  placeholder="Select"
-                  style={{ width: '100%' }}
-                  options={[
-                    { label: 'Discussion', value: 'Discussion' },
-                    { label: 'Meeting', value: 'Meeting' },
-                  ]}
-                />
-              </Form.Item>
-
-              <Form.Item label="Status" name="status">
-                <Select
-                  mode="multiple"
-                  placeholder="Select"
-                  style={{ width: '100%' }}
-                  options={[
-                    { label: 'Pending', value: 'Pending' },
-                    { label: 'Doing', value: 'Doing' },
-                    { label: 'Finished', value: 'Finished' },
-                    { label: 'Overdue', value: 'Overdue' },
-                  ]}
-                />
-              </Form.Item>
-
-              <Form.Item label="Projects" name="projects">
-                <Select mode="multiple" placeholder="Select" style={{ width: '100%' }} />
-              </Form.Item>
-
-              <Form.Item label="Milestone" name="milestone">
-                <Select mode="multiple" placeholder="Select" style={{ width: '100%' }} />
-              </Form.Item>
-
-              <Form.Item label="Timeframe" name="timeframe">
-                <RangePicker style={{ width: '100%' }} />
-              </Form.Item>
-            </Col>
-          </Row>
-        </Form>
-      </Modal>
+        onSubmit={handleCreateEvent}
+      />
     </div>
   );
 };

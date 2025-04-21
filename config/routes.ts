@@ -85,7 +85,7 @@ export default [
   {
     path: '/milestones',
     name: 'Milestones',
-    icon: 'form',
+    icon: 'tag',
     routes: [
       {
         path: '/milestones',
