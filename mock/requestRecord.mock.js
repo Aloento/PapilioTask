@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   'GET /api/currentUser': {
     data: {
       name: 'Serati Ma',

@@ -49,7 +49,7 @@ export default [
 
   {
     path: '/dashboard',
-    name: 'dashboard',
+    name: 'Dashboard',
     icon: 'dashboard',
     component: './dashboard',
   },
