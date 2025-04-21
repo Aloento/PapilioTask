@@ -151,4 +151,10 @@ export default [
       },
     ],
   },
+
+  {
+    path: '*',
+    layout: false,
+    component: './404',
+  },
 ];

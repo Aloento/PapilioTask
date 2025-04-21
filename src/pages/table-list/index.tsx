@@ -1,4 +1,4 @@
-import { removeRule, rule } from '@/services/ant-design-pro/api';
+import { removeRule, rule } from '@/services/api';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
   FooterToolbar,

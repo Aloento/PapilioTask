@@ -1,4 +1,4 @@
-import { updateRule } from '@/services/ant-design-pro/api';
+import { updateRule } from '@/services/api';
 import {
   ProFormDateTimePicker,
   ProFormRadio,
@@ -56,8 +56,8 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
       {contextHolder}
       {trigger
         ? cloneElement(trigger, {
-            onClick: onOpen,
-          })
+          onClick: onOpen,
+        })
         : null}
       <StepsForm
         stepsProps={{

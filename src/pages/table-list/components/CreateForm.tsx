@@ -1,4 +1,4 @@
-import { addRule } from '@/services/ant-design-pro/api';
+import { addRule } from '@/services/api';
 import { PlusOutlined } from '@ant-design/icons';
 import { ActionType, ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-components';
 import { useRequest } from '@umijs/max';
