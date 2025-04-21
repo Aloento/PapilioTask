@@ -1,6 +1,6 @@
-import React from 'react';
-import { Typography, Row, Col, Progress } from 'antd';
 import { ClockCircleOutlined } from '@ant-design/icons';
+import { Col, Progress, Row, Typography } from 'antd';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Milestone } from '../types';
 
@@ -14,22 +14,22 @@ interface MilestoneItemProps {
 const MilestoneItem: React.FC<MilestoneItemProps> = ({ milestone, index }) => {
   const renderDateLine = (m: Milestone) => {
     const updatedText = m.updatedMinutesAgo
-      ? `${m.updatedMinutesAgo} 分钟前`
+      ? `${m.updatedMinutesAgo} minutes ago`
       : m.updatedHoursAgo
-        ? `约 ${m.updatedHoursAgo} 小时前`
+        ? `about ${m.updatedHoursAgo} hours ago`
         : m.updatedDaysAgo !== undefined
-          ? `${m.updatedDaysAgo} 天前`
-          : `未知时间`;
+          ? `${m.updatedDaysAgo} days ago`
+          : `unknown time`;
 
     return (
       <Text type="secondary">
         {m.closedOn ? (
           <>
-            <Text strong>已关闭</Text> 于 {m.closedOn} <ClockCircleOutlined /> 最后更新 {updatedText}
+            <Text strong>Closed</Text> on {m.closedOn} <ClockCircleOutlined /> Last updated {updatedText}
           </>
         ) : (
           <>
-            无截止日期 <ClockCircleOutlined /> 最后更新 {updatedText}
+            No due date <ClockCircleOutlined /> Last updated {updatedText}
           </>
         )}
       </Text>
@@ -60,10 +60,10 @@ const MilestoneItem: React.FC<MilestoneItemProps> = ({ milestone, index }) => {
         </Col>
         <Col>
           <Text style={{ color: '#1a7f37', fontWeight: 500 }}>
-            {milestone.percent}% 已完成
+            {milestone.percent}% complete
           </Text>{' '}
           <Text type="secondary">
-            &nbsp;&nbsp; {milestone.open.toLocaleString()} 开放 &nbsp; {milestone.closed.toLocaleString()} 已关闭
+            &nbsp;&nbsp; {milestone.open.toLocaleString()} open &nbsp; {milestone.closed.toLocaleString()} closed
           </Text>
         </Col>
       </Row>

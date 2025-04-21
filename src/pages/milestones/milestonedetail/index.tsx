@@ -87,7 +87,7 @@ const MilestoneDetailPage: React.FC = () => {
       };
 
       setIssueList((prev) => [newIssue, ...prev]);
-      message.success('任务创建成功！');
+      message.success('Task created successfully!');
       form.resetFields();
       setModalVisible(false);
     } catch (err) {
@@ -105,7 +105,7 @@ const MilestoneDetailPage: React.FC = () => {
             icon={<LeftOutlined />}
             onClick={() => history.push('/milestones')}
           >
-            返回里程碑列表
+            Back to Milestone List
           </Button>
         </Col>
         <Col>
@@ -115,7 +115,7 @@ const MilestoneDetailPage: React.FC = () => {
             style={{ background: '#2da44e', borderColor: '#2da44e' }}
             onClick={() => setModalVisible(true)}
           >
-            添加事件
+            Add Event
           </Button>
         </Col>
       </Row>
@@ -137,11 +137,11 @@ const MilestoneDetailPage: React.FC = () => {
       {/* 创建事件模态框 */}
       <Modal
         open={modalVisible}
-        title="创建新事件"
+        title="Create New Event"
         onCancel={() => setModalVisible(false)}
         onOk={handleCreateEvent}
-        okText="创建"
-        cancelText="取消"
+        okText="Create"
+        cancelText="Cancel"
         width={480}
       >
         <CreateEventForm form={form} eventNumbers={eventNumbers} eventNames={eventNames} />

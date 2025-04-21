@@ -16,22 +16,22 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({
     <Form layout="vertical" form={form}>
       <Form.Item
         name="eventNumber"
-        label="事件编号"
-        rules={[{ required: true, message: '请选择事件编号' }]}
+        label="Event Number"
+        rules={[{ required: true, message: 'Please select an event number' }]}
       >
         <Select
-          placeholder="选择事件编号"
+          placeholder="Select event number"
           options={eventNumbers.map((e) => ({ value: e }))}
         />
       </Form.Item>
 
       <Form.Item
         name="eventName"
-        label="事件名称"
-        rules={[{ required: true, message: '请选择事件名称' }]}
+        label="Event Name"
+        rules={[{ required: true, message: 'Please select an event name' }]}
       >
         <Select
-          placeholder="选择事件名称"
+          placeholder="Select event name"
           options={eventNames.map((e) => ({ value: e }))}
         />
       </Form.Item>

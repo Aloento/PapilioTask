@@ -1,5 +1,5 @@
+import { DatePicker, Form, Input, Modal, Select } from 'antd';
 import React from 'react';
-import { Modal, Form, Input, Select, DatePicker } from 'antd';
 import { Event } from '../types';
 
 interface AddMilestoneModalProps {
@@ -18,29 +18,29 @@ const AddMilestoneModal: React.FC<AddMilestoneModalProps> = ({
   events
 }) => (
   <Modal
-    title="创建新里程碑"
+    title="Create New Milestone"
     open={visible}
     onCancel={onCancel}
     onOk={onSubmit}
-    okText="创建"
-    cancelText="取消"
+    okText="Create"
+    cancelText="Cancel"
   >
     <Form layout="vertical" form={form}>
       <Form.Item
-        label="里程碑名称"
+        label="Milestone Name"
         name="name"
-        rules={[{ required: true, message: '请输入里程碑名称' }]}
+        rules={[{ required: true, message: 'Please enter milestone name' }]}
       >
-        <Input placeholder="例如：新功能测试版" />
+        <Input placeholder="e.g.: New Feature Beta" />
       </Form.Item>
       <Form.Item
-        label="关联事件"
+        label="Related Event"
         name="eventId"
-        rules={[{ required: true, message: '请选择关联事件' }]}
+        rules={[{ required: true, message: 'Please select a related event' }]}
       >
         <Select
           showSearch
-          placeholder="选择关联事件"
+          placeholder="Select related event"
           optionFilterProp="children"
           filterOption={(input, option) =>
             ((option?.children as unknown) as string)
@@ -58,16 +58,16 @@ const AddMilestoneModal: React.FC<AddMilestoneModalProps> = ({
         </Select>
       </Form.Item>
       <Form.Item
-        label="时间范围"
+        label="Timeframe"
         name="timeframe"
       >
         <DatePicker.RangePicker style={{ width: '100%' }} />
       </Form.Item>
       <Form.Item
-        label="描述"
+        label="Description"
         name="description"
       >
-        <Input.TextArea placeholder="描述此里程碑的目标和范围..." rows={4} />
+        <Input.TextArea placeholder="Describe the goals and scope of this milestone..." rows={4} />
       </Form.Item>
     </Form>
   </Modal>

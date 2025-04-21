@@ -1,6 +1,6 @@
-import React from 'react';
-import { Typography, Row, Col, Space, Button, Input } from 'antd';
 import { CheckCircleOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Col, Input, Row, Space, Typography } from 'antd';
+import React from 'react';
 
 const { Title } = Typography;
 
@@ -27,14 +27,14 @@ const MilestoneFilters: React.FC<MilestoneFiltersProps> = ({
     <Col>
       <Space>
         <CheckCircleOutlined />
-        <Title level={4} style={{ margin: 0 }}>里程碑</Title>
+        <Title level={4} style={{ margin: 0 }}>Milestones</Title>
       </Space>
     </Col>
     <Col>
       <Space>
         <Input
           allowClear
-          placeholder="搜索里程碑"
+          placeholder="Search milestones"
           style={{ width: 200 }}
           prefix={<SearchOutlined />}
           value={searchText}
@@ -49,7 +49,7 @@ const MilestoneFilters: React.FC<MilestoneFiltersProps> = ({
           }}
           onClick={() => setStatusFilter('open')}
         >
-          {openCount} 开放
+          {openCount} Open
         </Button>
         <Button
           type="default"
@@ -60,10 +60,10 @@ const MilestoneFilters: React.FC<MilestoneFiltersProps> = ({
           }}
           onClick={() => setStatusFilter('closed')}
         >
-          {closedCount} 已关闭
+          {closedCount} Closed
         </Button>
         <Button type="primary" onClick={onAddMilestone}>
-          添加里程碑
+          Add Milestone
         </Button>
       </Space>
     </Col>

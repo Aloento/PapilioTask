@@ -25,14 +25,14 @@ const IssuesList: React.FC<IssuesListProps> = ({ issues }) => {
       {issues.length === 0 ? (
         <>
           <Text strong style={{ fontSize: 16, display: 'block', marginBottom: 8 }}>
-            此里程碑中没有开放的问题
+            No open issues in this milestone
           </Text>
           <Text style={{ fontSize: 14 }}>
-            向里程碑添加问题以帮助组织您的工作。查找并添加{' '}
+            Add issues to the milestone to help organize your work. Find and add{' '}
             <a href="#" style={{ color: '#0969da' }}>
-              没有里程碑的问题
+              issues without a milestone
             </a>
-            。
+            .
           </Text>
         </>
       ) : (
