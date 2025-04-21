@@ -97,12 +97,6 @@ export default [
         component: './milestones',
       },
       {
-        path: '/milestones/newmilestone',
-        name: 'new',
-        component: './milestones/newmilestone',
-        hideInMenu: true,
-      },
-      {
         path: '/milestones/:title',
         name: 'detail',
         component: './milestones/milestonedetail',
