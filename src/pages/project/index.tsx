@@ -1,75 +1,17 @@
 import { PlusOutlined } from '@ant-design/icons';
-import {
-  Avatar,
-  Button,
-  Card,
-  Col,
-  Input,
-  message,
-  Modal,
-  Row,
-  Select,
-  Space,
-  Tag,
-  Typography,
-} from 'antd';
+import { Button, Card, Col, Input, message, Row, Space } from 'antd';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import BoardColumnComponent from './components/BoardColumn';
+import CreateEventModal from './components/CreateEventModal';
+import { BoardColumn, columnTypes, Task } from './types';
 
-const { Title, Text, Paragraph } = Typography;
-const { Option } = Select;
-
-const getTagColor = (tag: string) => {
-  switch (tag) {
-    case 'Discussion':
-      return 'pink';
-    case 'Meeting':
-      return 'gold';
-    default:
-      return 'blue';
-  }
-};
-
-const TaskCard = ({ task }: any) => {
-  const navigate = useNavigate();
-
-  return (
-    <Card size="small" bordered style={{ marginBottom: 8 }}>
-      <Space direction="vertical">
-        <Text type="secondary">
-          <strong>{task.number}</strong>
-        </Text>
-        <Text
-          strong
-          style={{ color: '#1677ff', cursor: 'pointer' }}
-          onClick={() => navigate(`/events/eventdetail/${task.id}`)}
-        >
-          {task.name}
-        </Text>
-        <div>
-          {task.tags.map((tag: string) => (
-            <Tag key={tag} color={getTagColor(tag)}>
-              {tag}
-            </Tag>
-          ))}
-          <Avatar
-            size={24}
-            src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-            style={{ marginLeft: 8 }}
-          />
-        </div>
-      </Space>
-    </Card>
-  );
-};
-
-const columnTypes = ['Team User Stories', 'In Progress', 'Urgent', 'Performance', 'Done'];
-
-const EventBoardPage: React.FC = () => {
+// 主页面组件
+const ProjectBoardPage: React.FC = () => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchActive, setSearchActive] = useState(false);
 
-  const [boardData, setBoardData] = useState<any[]>([
+  // 初始化看板数据
+  const [boardData, setBoardData] = useState<BoardColumn[]>([
     { columnTitle: 'Team User Stories', count: 2, tasks: [] },
     { columnTitle: 'In Progress', count: 2, tasks: [] },
     { columnTitle: 'Urgent', count: 2, tasks: [] },
@@ -77,19 +19,16 @@ const EventBoardPage: React.FC = () => {
     { columnTitle: 'Done', count: 2, tasks: [] },
   ]);
 
-  const [filteredBoard, setFilteredBoard] = useState(boardData);
+  const [filteredBoard, setFilteredBoard] = useState<BoardColumn[]>(boardData);
 
+  // 模态框状态
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newEventName, setNewEventName] = useState('');
   const [selectedColumn, setSelectedColumn] = useState('');
   const [selectedTag, setSelectedTag] = useState('Meeting');
-  const navigate = useNavigate();
 
-  const handleCreate = () => {
-    handleAddEvent();
-  };
-
-  const generateUniqueEventNumber = () => {
+  // 生成唯一事件编号
+  const generateUniqueEventNumber = (): string => {
     const allNumbers = boardData
       .flatMap((col) => col.tasks.map((task) => task.number))
       .filter(Boolean);
@@ -103,17 +42,17 @@ const EventBoardPage: React.FC = () => {
       return max;
     }, 0);
 
-    const nextNumber = maxNumber + 1;
-    return `PRJ-${String(nextNumber).padStart(3, '0')}`;
+    return `PRJ-${String(maxNumber + 1).padStart(3, '0')}`;
   };
 
+  // 添加新事件
   const handleAddEvent = () => {
     if (!newEventName || !selectedColumn) {
-      message.error('Please fill all fields');
+      message.error('请填写所有必填字段');
       return;
     }
 
-    const newTask = {
+    const newTask: Task = {
       id: Date.now(),
       number: generateUniqueEventNumber(),
       name: newEventName,
@@ -133,24 +72,30 @@ const EventBoardPage: React.FC = () => {
 
     setBoardData(updatedBoard);
     setFilteredBoard(updatedBoard);
+    resetModalForm();
+    message.success('事件已添加！');
+  };
+
+  // 重置表单
+  const resetModalForm = () => {
     setIsModalVisible(false);
     setNewEventName('');
     setSelectedColumn('');
     setSelectedTag('Meeting');
     setSearchKeyword('');
     setSearchActive(false);
-    message.success('Event added!');
   };
 
+  // 搜索功能
   const handleSearch = () => {
     const keyword = searchKeyword.trim().toLowerCase();
     if (!keyword) {
-      message.warning('Please enter a keyword.');
+      message.warning('请输入搜索关键词');
       return;
     }
 
     const filtered = boardData.map((col) => {
-      const filteredTasks = col.tasks.filter((task: any) =>
+      const filteredTasks = col.tasks.filter((task) =>
         task.name.toLowerCase().includes(keyword),
       );
       return {
@@ -164,6 +109,7 @@ const EventBoardPage: React.FC = () => {
     setSearchActive(true);
   };
 
+  // 重置搜索
   const handleResetSearch = () => {
     setFilteredBoard(boardData);
     setSearchKeyword('');
@@ -172,12 +118,12 @@ const EventBoardPage: React.FC = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      {/* 顶部输入区域 */}
+      {/* 搜索和操作区域 */}
       <Card style={{ marginBottom: 24 }}>
         <Space direction="vertical" style={{ width: '100%' }}>
           <Space style={{ width: '100%', justifyContent: 'space-between' }}>
             <Input.Search
-              placeholder="Event Name"
+              placeholder="搜索事件名称"
               style={{ width: 300 }}
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
@@ -187,99 +133,44 @@ const EventBoardPage: React.FC = () => {
             />
             <Space>
               <Button onClick={handleResetSearch} disabled={!searchActive}>
-                Reset
+                重置
               </Button>
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
                 onClick={() => setIsModalVisible(true)}
               >
-                Add Event
+                添加事件
               </Button>
             </Space>
           </Space>
         </Space>
       </Card>
 
-      {/* 看板列 */}
+      {/* 看板列表 */}
       <Row gutter={16} wrap>
         {filteredBoard.map((column) => (
           <Col key={column.columnTitle} flex="1 0 220px">
-            <Card
-              title={
-                <Space>
-                  <span>{column.columnTitle}</span>
-                  <Text type="secondary">{column.count}</Text>
-                </Space>
-              }
-              bordered
-              bodyStyle={{ padding: 12 }}
-            >
-              {column.tasks.map((task) => (
-                <TaskCard key={task.id} task={task} />
-              ))}
-            </Card>
+            <BoardColumnComponent column={column} />
           </Col>
         ))}
       </Row>
 
-      {/* 弹窗 */}
-      <Modal
-        title="Create New Event"
-        open={isModalVisible}
+      {/* 创建事件模态框 */}
+      <CreateEventModal
+        visible={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
-        onOk={handleCreate}
-        okText="Create project"
-        cancelText="Cancel"
-      >
-        <Row gutter={32}>
-          <Col span={8}>
-            <Title level={5}>New board</Title>
-            <Paragraph>
-              Start with a board to spread your issues and pull requests across customizable
-              columns. Easily switch to a table or roadmap layout at any time.
-            </Paragraph>
-          </Col>
-          <Col span={16}>
-            <Title level={5}>Event name</Title>
-            <Input
-              placeholder="e.g. @yourname's awesome project"
-              value={newEventName}
-              onChange={(e) => setNewEventName(e.target.value)}
-            />
-
-            <Title level={5} style={{ marginTop: 16 }}>
-              Type
-            </Title>
-            <Select
-              placeholder="Select column"
-              style={{ width: '100%' }}
-              value={selectedColumn}
-              onChange={(value) => setSelectedColumn(value)}
-            >
-              {columnTypes.map((type) => (
-                <Option key={type} value={type}>
-                  {type}
-                </Option>
-              ))}
-            </Select>
-
-            <Title level={5} style={{ marginTop: 16 }}>
-              Label
-            </Title>
-            <Select
-              value={selectedTag}
-              onChange={(value) => setSelectedTag(value)}
-              style={{ width: '100%' }}
-            >
-              <Option value="Discussion">Discussion</Option>
-              <Option value="Meeting">Meeting</Option>
-            </Select>
-          </Col>
-        </Row>
-      </Modal>
+        onSubmit={handleAddEvent}
+        eventName={newEventName}
+        setEventName={setNewEventName}
+        selectedColumn={selectedColumn}
+        setSelectedColumn={setSelectedColumn}
+        selectedTag={selectedTag}
+        setSelectedTag={setSelectedTag}
+        columnTypes={columnTypes}
+      />
     </div>
   );
 };
 
-export default EventBoardPage;
+export default ProjectBoardPage;
