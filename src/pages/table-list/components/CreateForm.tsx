@@ -1,23 +1,19 @@
 import { addRule } from '@/services/ant-design-pro/api';
 import { PlusOutlined } from '@ant-design/icons';
 import { ActionType, ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-components';
-import { FormattedMessage, useIntl, useRequest } from '@umijs/max';
+import { useRequest } from '@umijs/max';
 import { Button, message } from 'antd';
 import { FC } from 'react';
-
 interface CreateFormProps {
   reload?: ActionType['reload'];
 }
-
 const CreateForm: FC<CreateFormProps> = (props) => {
   const { reload } = props;
-
   const [messageApi, contextHolder] = message.useMessage();
   /**
    * @en-US International configuration
    * @zh-CN 国际化配置
    * */
-  const intl = useIntl();
 
   const { run, loading } = useRequest(addRule, {
     manual: true,
@@ -29,25 +25,26 @@ const CreateForm: FC<CreateFormProps> = (props) => {
       messageApi.error('Adding failed, please try again!');
     },
   });
-
   return (
     <>
       {contextHolder}
       <ModalForm
-        title={intl.formatMessage({
-          id: 'pages.searchTable.createForm.newRule',
-          defaultMessage: 'New rule',
-        })}
+        title={'New Rule'}
         trigger={
           <Button type="primary" icon={<PlusOutlined />}>
-            <FormattedMessage id="pages.searchTable.new" defaultMessage="New" />
+            New
           </Button>
         }
         width="400px"
-        modalProps={{ okButtonProps: { loading } }}
+        modalProps={{
+          okButtonProps: {
+            loading,
+          },
+        }}
         onFinish={async (value) => {
-          await run({ data: value as API.RuleListItem });
-
+          await run({
+            data: value as API.RuleListItem,
+          });
           return true;
         }}
       >
@@ -55,12 +52,7 @@ const CreateForm: FC<CreateFormProps> = (props) => {
           rules={[
             {
               required: true,
-              message: (
-                <FormattedMessage
-                  id="pages.searchTable.ruleName"
-                  defaultMessage="Rule name is required"
-                />
-              ),
+              message: 'Rule name is required',
             },
           ]}
           width="md"
@@ -71,5 +63,4 @@ const CreateForm: FC<CreateFormProps> = (props) => {
     </>
   );
 };
-
 export default CreateForm;

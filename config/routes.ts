@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @name umi 的路由配置
  * @description 只支持 path,component,routes,redirect,wrappers,name,icon 的配置
  * @param path  path 只支持两种占位符配置，第一种是动态参数 :id 的形式，第二种是 * 通配符，通配符只能出现路由字符串的最后。
@@ -21,30 +21,28 @@ export default [
     layout: false,
     routes: [
       {
-        path: '/user/login',
-        layout: false,
-        name: 'login',
-        component: './user/login',
-      },
-      {
         path: '/user',
         redirect: '/user/login',
       },
       {
-        name: 'register-result',
-        icon: 'smile',
-        path: '/user/register-result',
-        component: './user/register-result',
+        path: '/user/login',
+        name: 'login',
+        component: './user/login',
+        layout: false,
       },
       {
-        name: 'register',
-        icon: 'smile',
         path: '/user/register',
+        name: 'register',
         component: './user/register',
       },
       {
-        component: '404',
+        path: '/user/register-result',
+        name: 'register-result',
+        component: './user/register-result',
+      },
+      {
         path: '/user/*',
+        component: '404',
       },
     ],
   },
@@ -58,30 +56,27 @@ export default [
 
   {
     path: '/events',
-    icon: 'form',
     name: 'Events',
+    icon: 'form',
     routes: [
       {
         path: '/events',
         redirect: '/events/list',
       },
       {
-        name: 'Event Detail',
-        icon: 'smile',
+        path: '/events/list',
+        name: 'List',
+        component: './events',
+      },
+      {
         path: '/events/eventdetail/:id',
+        name: 'Detail',
         component: './events/eventdetail',
         hideInMenu: true,
       },
       {
-        name: 'List',
-        icon: 'smile',
-        path: '/events/list',
-        component: './events',
-      },
-      {
-        name: 'Labels',
-        icon: 'smile',
         path: '/events/labels',
+        name: 'Labels',
         component: './events/labels',
       },
     ],
@@ -89,41 +84,37 @@ export default [
 
   {
     path: '/milestones',
-    icon: 'form',
     name: 'Milestones',
+    icon: 'form',
     routes: [
       {
         path: '/milestones',
         redirect: '/milestones/list',
       },
       {
-        name: 'Milestone List',
-        icon: 'smile',
         path: '/milestones/list',
+        name: 'List',
         component: './milestones',
+      },
+      {
+        path: '/milestones/newmilestone',
+        name: 'new',
+        component: './milestones/newmilestone',
         hideInMenu: true,
       },
       {
-        name: 'Milestone Detail',
-        icon: 'smile',
         path: '/milestones/:title',
+        name: 'detail',
         component: './milestones/milestonedetail',
         hideInMenu: true,
       },
-      {
-        name: 'New Milestone',
-        icon: 'smile',
-        path: '/milestones/newmilestone',
-        component: './milestones/newmilestone',
-        hideInMenu: true,
-      }
     ],
   },
 
   {
     path: '/project',
+    name: 'Project',
     icon: 'table',
-    name: 'Project Board',
     component: './project/board',
   },
 
@@ -136,30 +127,27 @@ export default [
 
   {
     path: '/profile',
-    icon: 'CheckCircleOutlined',
     name: 'Profile',
+    icon: 'user',
     routes: [
       {
         path: '/profile',
         redirect: '/profile/publicprofile',
       },
       {
-        name: 'Account',
-        icon: 'smile',
+        path: '/profile/publicprofile',
+        name: 'PublicProfile',
+        component: './profile/publicprofile',
+      },
+      {
         path: '/profile/account',
+        name: 'Account',
         component: './profile/account',
       },
       {
-        name: 'Notifications',
-        icon: 'smile',
         path: '/profile/notifications',
+        name: 'Notifications',
         component: './profile/notifications',
-      },
-      {
-        name: 'Public Profile',
-        icon: 'smile',
-        path: '/profile/publicprofile',
-        component: './profile/publicprofile',
       },
     ],
   },

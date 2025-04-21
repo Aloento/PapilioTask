@@ -8,11 +8,11 @@ const Footer: React.FC = () => {
       style={{
         background: 'none',
       }}
-      copyright="Powered by Ant Desgin"
+      copyright="Powered by DEVLE"
       links={[
         {
-          key: 'Ant Design Pro',
-          title: 'Ant Design Pro',
+          key: 'PapilioTask',
+          title: 'PapilioTask',
           href: 'https://pro.ant.design',
           blankTarget: true,
         },
