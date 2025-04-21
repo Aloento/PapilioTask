@@ -16,7 +16,6 @@ const Settings: ProLayoutProps & {
   fixSiderbar: true,
   colorWeak: false,
   title: 'PapilioTask',
-  pwa: true,
   logo: '/logo.png',
   iconfontUrl: '',
   token: {
