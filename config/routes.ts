@@ -126,12 +126,7 @@ export default [
     routes: [
       {
         path: '/profile',
-        redirect: '/profile/publicprofile',
-      },
-      {
-        path: '/profile/publicprofile',
-        name: 'PublicProfile',
-        component: './profile/publicprofile',
+        redirect: '/profile/account',
       },
       {
         path: '/profile/account',
