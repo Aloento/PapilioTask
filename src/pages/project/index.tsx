@@ -5,12 +5,12 @@ import BoardColumnComponent from './components/BoardColumn';
 import CreateEventModal from './components/CreateEventModal';
 import { BoardColumn, columnTypes, Task } from './types';
 
-// 主页面组件
+// Main page component
 const ProjectBoardPage: React.FC = () => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchActive, setSearchActive] = useState(false);
 
-  // 初始化看板数据
+  // Initialize board data
   const [boardData, setBoardData] = useState<BoardColumn[]>([
     { columnTitle: 'Team User Stories', count: 2, tasks: [] },
     { columnTitle: 'In Progress', count: 2, tasks: [] },
@@ -21,13 +21,13 @@ const ProjectBoardPage: React.FC = () => {
 
   const [filteredBoard, setFilteredBoard] = useState<BoardColumn[]>(boardData);
 
-  // 模态框状态
+  // Modal state
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newEventName, setNewEventName] = useState('');
   const [selectedColumn, setSelectedColumn] = useState('');
   const [selectedTag, setSelectedTag] = useState('Meeting');
 
-  // 生成唯一事件编号
+  // Generate unique event number
   const generateUniqueEventNumber = (): string => {
     const allNumbers = boardData
       .flatMap((col) => col.tasks.map((task) => task.number))
@@ -45,10 +45,10 @@ const ProjectBoardPage: React.FC = () => {
     return `PRJ-${String(maxNumber + 1).padStart(3, '0')}`;
   };
 
-  // 添加新事件
+  // Add new event
   const handleAddEvent = () => {
     if (!newEventName || !selectedColumn) {
-      message.error('请填写所有必填字段');
+      message.error('Please fill in all required fields');
       return;
     }
 
@@ -73,10 +73,10 @@ const ProjectBoardPage: React.FC = () => {
     setBoardData(updatedBoard);
     setFilteredBoard(updatedBoard);
     resetModalForm();
-    message.success('事件已添加！');
+    message.success('Event added!');
   };
 
-  // 重置表单
+  // Reset form
   const resetModalForm = () => {
     setIsModalVisible(false);
     setNewEventName('');
@@ -86,11 +86,11 @@ const ProjectBoardPage: React.FC = () => {
     setSearchActive(false);
   };
 
-  // 搜索功能
+  // Search functionality
   const handleSearch = () => {
     const keyword = searchKeyword.trim().toLowerCase();
     if (!keyword) {
-      message.warning('请输入搜索关键词');
+      message.warning('Please enter a search keyword');
       return;
     }
 
@@ -109,7 +109,7 @@ const ProjectBoardPage: React.FC = () => {
     setSearchActive(true);
   };
 
-  // 重置搜索
+  // Reset search
   const handleResetSearch = () => {
     setFilteredBoard(boardData);
     setSearchKeyword('');
@@ -118,12 +118,12 @@ const ProjectBoardPage: React.FC = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      {/* 搜索和操作区域 */}
+      {/* Search and operation area */}
       <Card style={{ marginBottom: 24 }}>
         <Space direction="vertical" style={{ width: '100%' }}>
           <Space style={{ width: '100%', justifyContent: 'space-between' }}>
             <Input.Search
-              placeholder="搜索事件名称"
+              placeholder="Search event name"
               style={{ width: 300 }}
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
@@ -133,21 +133,21 @@ const ProjectBoardPage: React.FC = () => {
             />
             <Space>
               <Button onClick={handleResetSearch} disabled={!searchActive}>
-                重置
+                Reset
               </Button>
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
                 onClick={() => setIsModalVisible(true)}
               >
-                添加事件
+                Add Event
               </Button>
             </Space>
           </Space>
         </Space>
       </Card>
 
-      {/* 看板列表 */}
+      {/* Board list */}
       <Row gutter={16} wrap>
         {filteredBoard.map((column) => (
           <Col key={column.columnTitle} flex="1 0 220px">
@@ -156,7 +156,7 @@ const ProjectBoardPage: React.FC = () => {
         ))}
       </Row>
 
-      {/* 创建事件模态框 */}
+      {/* Create event modal */}
       <CreateEventModal
         visible={isModalVisible}
         onCancel={() => setIsModalVisible(false)}

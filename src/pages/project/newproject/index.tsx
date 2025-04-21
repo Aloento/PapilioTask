@@ -1,57 +1,95 @@
-import React from 'react';
 import {
-  Row,
-  Col,
-  Card,
-  Typography,
-  Input,
   Button,
+  Card,
+  Col,
+  Form,
+  Input,
+  Row,
   Space,
+  Typography,
 } from 'antd';
-import { history } from 'umi';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const { Title, Paragraph } = Typography;
 
-const CreateProjectPage: React.FC = () => {
-  const [projectName, setProjectName] = React.useState("");
+interface ProjectFormValues {
+  projectName: string;
+}
 
-  const handleCreate = () => {
-    console.log("Creating project:", projectName);
-    // Redirect or API call can go here
-    history.push('/project/board');
+const CreateProjectPage: React.FC = () => {
+  const [form] = Form.useForm<ProjectFormValues>();
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleCancel = () => {
+    navigate(-1);
+  };
+
+  const handleCreate = async (values: ProjectFormValues) => {
+    try {
+      setIsSubmitting(true);
+      console.log("Creating project:", values.projectName);
+      // API call would go here
+      // await createProject(values.projectName);
+      navigate('/project/board');
+    } catch (error) {
+      console.error("Failed to create project:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div style={{ padding: 24 }}>
       <Card>
-        <Row gutter={32}>
-          {/* Left Panel */}
-          <Col span={8}>
-            <Title level={5}>New board</Title>
-            <Paragraph>
-              Start with a board to spread your issues and pull requests across customizable
-              columns. Easily switch to a table or roadmap layout at any time.
-            </Paragraph>
-          </Col>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleCreate}
+          initialValues={{ projectName: '' }}
+        >
+          <Row gutter={32}>
+            {/* Left Panel - Information */}
+            <Col span={8}>
+              <Title level={5}>New board</Title>
+              <Paragraph>
+                Start with a board to spread your issues and pull requests across customizable
+                columns. Easily switch to a table or roadmap layout at any time.
+              </Paragraph>
+            </Col>
 
-          {/* Right Panel */}
-          <Col span={16}>
-            <Title level={5}>Project name</Title>
-            <Input
-              placeholder="e.g. @yourname's awesome project"
-              value={projectName}
-              onChange={(e) => setProjectName(e.target.value)}
-              style={{ marginBottom: 24 }}
-            />
+            {/* Right Panel - Form */}
+            <Col span={16}>
+              <Form.Item
+                name="projectName"
+                label={<Title level={5} style={{ margin: 0 }}>Project name</Title>}
+                rules={[
+                  { required: true, message: 'Please enter a project name' },
+                  { max: 50, message: 'Project name cannot exceed 50 characters' }
+                ]}
+              >
+                <Input
+                  placeholder="e.g. @yourname's awesome project"
+                  maxLength={50}
+                />
+              </Form.Item>
 
-            <div style={{ marginTop: 24, textAlign: 'right' }}>
-              <Space>
-                <Button onClick={() => history.back()}>Cancel</Button>
-                <Button type="primary" onClick={handleCreate}>Create project</Button>
-              </Space>
-            </div>
-          </Col>
-        </Row>
+              <div style={{ marginTop: 24, textAlign: 'right' }}>
+                <Space>
+                  <Button onClick={handleCancel}>Cancel</Button>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={isSubmitting}
+                  >
+                    Create project
+                  </Button>
+                </Space>
+              </div>
+            </Col>
+          </Row>
+        </Form>
       </Card>
     </div>
   );

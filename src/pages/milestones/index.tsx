@@ -7,7 +7,7 @@ import { Event, Milestone } from './types';
 
 const { Text } = Typography;
 
-// 初始数据
+// Initial data
 export const initialMilestones: Milestone[] = [
   {
     id: '1',
@@ -37,7 +37,7 @@ export const events: Event[] = [
   { id: 3, name: 'Legacy Phase-out', status: 'Finished' },
 ];
 
-// 主组件
+// Main component
 const MilestonesPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'open' | 'closed'>('open');
   const [searchText, setSearchText] = useState('');
@@ -47,7 +47,7 @@ const MilestonesPage: React.FC = () => {
 
   const handleAddMilestone = () => {
     form.validateFields().then((values) => {
-      // 生成唯一ID
+      // Generate unique ID
       const newId = `milestone-${Date.now()}`;
       const selectedEvent = events.find((e) => e.id === values.eventId);
 
@@ -61,7 +61,7 @@ const MilestonesPage: React.FC = () => {
         updatedMinutesAgo: 0,
         eventId: values.eventId,
         description: values.description ||
-          `关联事件: ${selectedEvent?.name || '未指定'}`,
+          `Associated event: ${selectedEvent?.name || 'Not specified'}`,
       };
 
       setMilestoneList([newMilestone, ...milestoneList]);
@@ -106,7 +106,7 @@ const MilestonesPage: React.FC = () => {
           ))
         ) : (
           <div style={{ padding: '40px 0', textAlign: 'center' }}>
-            <Text type="secondary">没有找到匹配的里程碑</Text>
+            <Text type="secondary">No matching milestones found</Text>
           </div>
         )}
       </div>
