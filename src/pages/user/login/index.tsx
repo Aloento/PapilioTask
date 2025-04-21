@@ -1,22 +1,16 @@
 import { Footer } from '@/components';
 import { login } from '@/services/ant-design-pro/api';
-import { getFakeCaptcha } from '@/services/ant-design-pro/login';
 import {
-  AlipayCircleOutlined,
   LockOutlined,
-  MobileOutlined,
-  TaobaoCircleOutlined,
-  UserOutlined,
-  WeiboCircleOutlined,
+  UserOutlined
 } from '@ant-design/icons';
 import {
   LoginForm,
-  ProFormCaptcha,
   ProFormCheckbox,
   ProFormText,
 } from '@ant-design/pro-components';
 import { Helmet, useModel } from '@umijs/max';
-import { Alert, message, Tabs } from 'antd';
+import { Alert, message } from 'antd';
 import { createStyles } from 'antd-style';
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom';
@@ -56,16 +50,7 @@ const useStyles = createStyles(({ token }) => {
     },
   };
 });
-const ActionIcons = () => {
-  const { styles } = useStyles();
-  return (
-    <>
-      <AlipayCircleOutlined key="AlipayCircleOutlined" className={styles.action} />
-      <TaobaoCircleOutlined key="TaobaoCircleOutlined" className={styles.action} />
-      <WeiboCircleOutlined key="WeiboCircleOutlined" className={styles.action} />
-    </>
-  );
-};
+
 const LoginMessage: React.FC<{
   content: string;
 }> = ({ content }) => {
@@ -82,7 +67,6 @@ const LoginMessage: React.FC<{
 };
 const Login: React.FC = () => {
   const [userLoginState, setUserLoginState] = useState<API.LoginResult>({});
-  const [type, setType] = useState<string>('account');
   const { initialState, setInitialState } = useModel('@@initialState');
   const { styles } = useStyles();
   const fetchUserInfo = async () => {
@@ -101,7 +85,6 @@ const Login: React.FC = () => {
       // 登录
       const msg = await login({
         ...values,
-        type,
       });
       if (msg.status === 'ok') {
         const defaultLoginSuccessMessage = 'Login successful!';
@@ -145,118 +128,49 @@ const Login: React.FC = () => {
           initialValues={{
             autoLogin: true,
           }}
-          actions={['Login with :', <ActionIcons key="icons" />]}
           onFinish={async (values) => {
             await handleSubmit(values as API.LoginParams);
           }}
         >
-          <Tabs
-            activeKey={type}
-            onChange={setType}
-            centered
-            items={[
-              {
-                key: 'account',
-                label: 'Account Login',
-              },
-              {
-                key: 'mobile',
-                label: 'Phone Login',
-              },
-            ]}
+
+          <div
+            style={{
+              marginBottom: 24,
+            }}
           />
 
           {status === 'error' && loginType === 'account' && (
             <LoginMessage content={'Incorrect username/password(admin/ant.design)'} />
           )}
-          {type === 'account' && (
-            <>
-              <ProFormText
-                name="username"
-                fieldProps={{
-                  size: 'large',
-                  prefix: <UserOutlined />,
-                }}
-                placeholder={'Username: admin or user'}
-                rules={[
-                  {
-                    required: true,
-                    message: 'Please input your username!',
-                  },
-                ]}
-              />
-              <ProFormText.Password
-                name="password"
-                fieldProps={{
-                  size: 'large',
-                  prefix: <LockOutlined />,
-                }}
-                placeholder={'Password: ant.design'}
-                rules={[
-                  {
-                    required: true,
-                    message: 'Please input your password!',
-                  },
-                ]}
-              />
-            </>
-          )}
 
-          {status === 'error' && loginType === 'mobile' && <LoginMessage content="验证码错误" />}
-          {type === 'mobile' && (
-            <>
-              <ProFormText
-                fieldProps={{
-                  size: 'large',
-                  prefix: <MobileOutlined />,
-                }}
-                name="mobile"
-                placeholder={'Phone Number'}
-                rules={[
-                  {
-                    required: true,
-                    message: 'Please input your phone number!',
-                  },
-                  {
-                    pattern: /^1\d{10}$/,
-                    message: 'Phone number is invalid!',
-                  },
-                ]}
-              />
-              <ProFormCaptcha
-                fieldProps={{
-                  size: 'large',
-                  prefix: <LockOutlined />,
-                }}
-                captchaProps={{
-                  size: 'large',
-                }}
-                placeholder={'Verification Code'}
-                captchaTextRender={(timing, count) => {
-                  if (timing) {
-                    return `${count} ${'sec(s)'}`;
-                  }
-                  return 'Get Code';
-                }}
-                name="captcha"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Please input verification code!',
-                  },
-                ]}
-                onGetCaptcha={async (phone) => {
-                  const result = await getFakeCaptcha({
-                    phone,
-                  });
-                  if (!result) {
-                    return;
-                  }
-                  message.success('获取验证码成功！验证码为：1234');
-                }}
-              />
-            </>
-          )}
+          <ProFormText
+            name="username"
+            fieldProps={{
+              size: 'large',
+              prefix: <UserOutlined />,
+            }}
+            placeholder={'Username: admin or user'}
+            rules={[
+              {
+                required: true,
+                message: 'Please input your username!',
+              },
+            ]}
+          />
+          <ProFormText.Password
+            name="password"
+            fieldProps={{
+              size: 'large',
+              prefix: <LockOutlined />,
+            }}
+            placeholder={'Password: ant.design'}
+            rules={[
+              {
+                required: true,
+                message: 'Please input your password!',
+              },
+            ]}
+          />
           <div
             style={{
               marginBottom: 24,
@@ -265,13 +179,6 @@ const Login: React.FC = () => {
             <ProFormCheckbox noStyle name="autoLogin">
               Remember me
             </ProFormCheckbox>
-            <a
-              style={{
-                float: 'right',
-              }}
-            >
-              Forgot Password ?
-            </a>
           </div>
         </LoginForm>
       </div>
