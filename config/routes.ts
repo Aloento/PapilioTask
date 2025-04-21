@@ -109,7 +109,7 @@ export default [
     path: '/project',
     name: 'Project',
     icon: 'table',
-    component: './project/board',
+    component: './project',
   },
 
   {
