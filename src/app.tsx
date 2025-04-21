@@ -1,4 +1,4 @@
-import { AvatarDropdown, AvatarName, Footer, Question } from '@/components';
+import { AvatarDropdown, AvatarName, Footer } from '@/components';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
@@ -48,7 +48,6 @@ export async function getInitialState(): Promise<{
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
   return {
-    actionsRender: () => [<Question key="doc" />],
     avatarProps: {
       src: initialState?.currentUser?.avatar,
       title: <AvatarName />,
