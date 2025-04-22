@@ -4,27 +4,59 @@ import { useCallback, useEffect, useState } from "react";
 // Define the model identifier for Phi-3.5-mini
 const MODEL_ID = "Phi-3.5-mini-instruct-q4f16_1-MLC";
 
+// 全局LLM实例变量
+let globalLLM: webllm.MLCEngineInterface | null = null;
+let isInitializing = false;
+let progressCallbacks: ((progress: number) => void)[] = [];
+
 // Hook to initialize and load the LLM engine with progress reporting
 export function useLLM() {
-  const [llm, setLLM] = useState<webllm.MLCEngineInterface>();
-  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [llm, setLLM] = useState<webllm.MLCEngineInterface | undefined>(globalLLM || undefined);
+  const [loadingProgress, setLoadingProgress] = useState(globalLLM ? 100 : 0);
 
   useEffect(() => {
-    let mounted = true;
+    // 如果全局LLM已存在，直接使用
+    if (globalLLM) {
+      setLLM(globalLLM);
+      setLoadingProgress(100);
+      return;
+    }
+
+    // 注册进度回调
+    progressCallbacks.push(setLoadingProgress);
+
+    // 如果已经有初始化过程，无需重复初始化
+    if (isInitializing) {
+      return () => {
+        progressCallbacks = progressCallbacks.filter(cb => cb !== setLoadingProgress);
+      };
+    }
+
+    // 开始初始化
+    isInitializing = true;
     const init = async () => {
       const onProgress = (report: webllm.InitProgressReport) => {
-        if (mounted) {
-          setLoadingProgress(report.progress);
-        }
+        // 更新所有注册的进度回调
+        const progress = report.progress;
+        progressCallbacks.forEach(cb => cb(progress));
       };
 
-      const engine = await webllm.CreateMLCEngine(MODEL_ID, { initProgressCallback: onProgress });
-      if (mounted) {
+      try {
+        const engine = await webllm.CreateMLCEngine(MODEL_ID, { initProgressCallback: onProgress });
+        globalLLM = engine;
         setLLM(engine);
+        progressCallbacks.forEach(cb => cb(100));
+      } catch (error) {
+        console.error("Failed to initialize LLM:", error);
+      } finally {
+        isInitializing = false;
       }
     };
     init();
-    return () => { mounted = false; };
+
+    return () => {
+      progressCallbacks = progressCallbacks.filter(cb => cb !== setLoadingProgress);
+    };
   }, []);
 
   return { llm, loadingProgress };
