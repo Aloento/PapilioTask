@@ -37,7 +37,8 @@ export function useLLM() {
     const init = async () => {
       const onProgress = (report: webllm.InitProgressReport) => {
         // 更新所有注册的进度回调
-        const progress = report.progress;
+        // 将[0,1]范围的小数转换为[0,100]的百分比
+        const progress = Math.round(report.progress * 100);
         progressCallbacks.forEach(cb => cb(progress));
       };
 

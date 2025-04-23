@@ -20,7 +20,7 @@ const AIAssistant: React.FC = () => {
   const { sendMessage, loadingProgress } = usePapilioChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // 自动滚动到对话底部
+  // Automatically scroll to the bottom of the chat
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -28,6 +28,19 @@ const AIAssistant: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Add body class name when Modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('ai-chat-modal-open');
+    } else {
+      document.body.classList.remove('ai-chat-modal-open');
+    }
+
+    return () => {
+      document.body.classList.remove('ai-chat-modal-open');
+    };
+  }, [isOpen]);
 
   const handleOpen = () => {
     setIsOpen(true);
@@ -52,7 +65,7 @@ const AIAssistant: React.FC = () => {
       if (!stream) {
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: '抱歉，AI模型尚未准备好。请稍后再试。'
+          content: 'Sorry, the AI model is not ready yet. Please try again later.'
         }]);
         setIsLoading(false);
         return;
@@ -65,11 +78,11 @@ const AIAssistant: React.FC = () => {
 
         setMessages(prev => {
           const newMessages = [...prev];
-          // 如果已经有助手回复，则更新它
+          // If there is already an assistant reply, update it
           if (newMessages[newMessages.length - 1]?.role === 'assistant') {
             newMessages[newMessages.length - 1].content = assistantResponse;
           } else {
-            // 否则添加新的助手消息
+            // Otherwise, add a new assistant message
             newMessages.push({ role: 'assistant', content: assistantResponse });
           }
           return newMessages;
@@ -79,7 +92,7 @@ const AIAssistant: React.FC = () => {
       console.error('Error sending message:', error);
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: '抱歉，我遇到了一些问题。请稍后再试。'
+        content: 'Sorry, I encountered some issues. Please try again later.'
       }]);
     } finally {
       setIsLoading(false);
@@ -101,32 +114,44 @@ const AIAssistant: React.FC = () => {
         icon={<RobotOutlined />}
         type="primary"
         onClick={handleOpen}
-        tooltip={isModelLoading ? `AI助手 (加载中: ${loadingProgress}%)` : "AI助手"}
+        tooltip={isModelLoading ? `AI Assistant (Loading: ${loadingProgress}%)` : "AI Assistant"}
         className="ai-assistant-button"
       />
 
       <Modal
         title={
           <div className="chat-header">
-            <RobotOutlined /> <span>PapilioTask AI助手</span>
+            <RobotOutlined /> <span>PapilioTask AI Assistant</span>
           </div>
         }
         open={isOpen}
         onCancel={handleClose}
         footer={null}
-        width={400}
+        width={450}
         className="ai-chat-modal"
         closeIcon={<CloseOutlined />}
+        mask={false}
+        maskClosable={false}
+        centered={false}
+        wrapClassName="ai-chat-modal-wrapper"
+        destroyOnClose={false}
+        getContainer={false}  // Do not mount Modal to body to avoid scrolling issues
+        styles={{
+          body: {
+            width: '350px',
+            overflowX: 'hidden'
+          }
+        }}
       >
         {isModelLoading ? (
           <div className="model-loading-container">
             <Spin size="large" />
             <Typography.Title level={5} style={{ marginTop: 16 }}>
-              AI模型加载中...
+              AI Model Loading...
             </Typography.Title>
             <Progress percent={loadingProgress} status="active" />
             <Typography.Text type="secondary">
-              首次加载可能需要几分钟，请耐心等待
+              Initial loading may take a few minutes, please be patient
             </Typography.Text>
           </div>
         ) : (
@@ -135,7 +160,7 @@ const AIAssistant: React.FC = () => {
               {messages.length === 0 ? (
                 <div className="empty-chat-message">
                   <Typography.Text type="secondary">
-                    你好！我是PapilioTask AI助手，有什么可以帮助你的？
+                    Hello! I am PapilioTask AI Assistant. How can I assist you?
                   </Typography.Text>
                 </div>
               ) : (
@@ -148,10 +173,10 @@ const AIAssistant: React.FC = () => {
                       <List.Item className={`message-item ${message.role}`}>
                         <List.Item.Meta
                           avatar={message.role === 'user' ?
-                            <Avatar style={{ backgroundColor: '#1890ff' }}>我</Avatar> :
+                            <Avatar style={{ backgroundColor: '#1890ff' }}>Me</Avatar> :
                             <Avatar style={{ backgroundColor: '#52c41a' }}><RobotOutlined /></Avatar>
                           }
-                          children={<div className="message-content">{message.content}</div>}
+                          description={<div className="message-content">{message.content}</div>}
                         />
                       </List.Item>
                     )}
@@ -161,7 +186,7 @@ const AIAssistant: React.FC = () => {
                   {isLoading && (
                     <div className="loading-indicator">
                       <Spin size="small" />
-                      <Text type="secondary" style={{ marginLeft: 8 }}>AI正在思考...</Text>
+                      <Text type="secondary" style={{ marginLeft: 8 }}>AI is thinking...</Text>
                     </div>
                   )}
                 </>
@@ -173,7 +198,7 @@ const AIAssistant: React.FC = () => {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="有什么可以帮助你的？"
+                placeholder="How can I help you?"
                 autoSize={{ minRows: 1, maxRows: 4 }}
                 disabled={isLoading || isModelLoading}
               />
