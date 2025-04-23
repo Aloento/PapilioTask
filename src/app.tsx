@@ -4,6 +4,7 @@ import { SettingDrawer } from '@ant-design/pro-components';
 import type { RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
 import { history } from '@umijs/max';
 import defaultSettings from '../config/defaultSettings';
+import AIAssistant from './components/AIAssistant';
 import { errorConfig } from './requestErrorConfig';
 import { currentUser as queryCurrentUser } from './services/api';
 const isDev = process.env.NODE_ENV === 'development';
@@ -95,6 +96,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
       return (
         <>
           {children}
+          <AIAssistant />
           {isDev && (
             <SettingDrawer
               disableUrlParams

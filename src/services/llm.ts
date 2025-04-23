@@ -63,58 +63,98 @@ export function useLLM() {
 }
 
 // 1. Event description/reply polishing
-export async function polishText(llm: webllm.MLCEngineInterface, input: string): Promise<string> {
-  const prompt = `You are a professional editor. Please rewrite the following text to be clearer and more polished without adding any extra AI commentary:\n\n${input}`;
-  const result = await llm.chat.completions.create({
-    messages: [{ role: "system", content: prompt }],
-    model: MODEL_ID,
-    stream: false,
-  });
-  if (!result.choices[0].message || !result.choices[0].message.content) {
-    throw new Error("Unexpected response format from LLM");
-  }
-  return result.choices[0].message.content.trim();
+export function usePolishText() {
+  const { llm, loadingProgress } = useLLM();
+
+  const polishText = useCallback(
+    async (input: string): Promise<{ result: string | null; loadingProgress: number }> => {
+      if (!llm) {
+        return { result: null, loadingProgress };
+      }
+
+      try {
+        const prompt = `You are a professional editor. Please rewrite the following text to be clearer and more polished without adding any extra AI commentary:\n\n${input}`;
+        const result = await llm.chat.completions.create({
+          messages: [{ role: "system", content: prompt }],
+          model: MODEL_ID,
+          stream: false,
+        });
+        if (!result.choices[0].message || !result.choices[0].message.content) {
+          return { result: null, loadingProgress: 100 };
+        }
+        return { result: result.choices[0].message.content.trim(), loadingProgress: 100 };
+      } catch (error) {
+        console.error("Error polishing text:", error);
+        return { result: null, loadingProgress };
+      }
+    },
+    [llm, loadingProgress]
+  );
+
+  return { polishText, loadingProgress };
 }
 
 // 2. AI chat helper for PapilioTask
 export function usePapilioChat() {
-  const { llm } = useLLM();
+  const { llm, loadingProgress } = useLLM();
 
   const sendMessage = useCallback(
-    async (history: { role: string; content: string }[]) => {
-      if (!llm) throw new Error("LLM not loaded");
-      const messages = [
-        { role: "system", content: "You are PapilioTask assistant. Help the user manage events." },
-        ...history,
-      ];
-      const stream = llm.chat.completions.create({
-        messages: messages.map(msg => ({ role: msg.role as "system" | "user" | "assistant", content: msg.content })),
-        model: MODEL_ID,
-        stream: true,
-      });
-      return stream;
+    (history: { role: string; content: string }[]) => {
+      if (!llm) {
+        return { stream: null, loadingProgress };
+      }
+
+      try {
+        const messages = [
+          { role: "system", content: "You are PapilioTask assistant. Help the user manage events." },
+          ...history,
+        ];
+        const stream = llm.chat.completions.create({
+          messages: messages.map(msg => ({ role: msg.role as "system" | "user" | "assistant", content: msg.content })),
+          model: MODEL_ID,
+          stream: true,
+        });
+        return { stream, loadingProgress: 100 };
+      } catch (error) {
+        console.error("Error sending message:", error);
+        return { stream: null, loadingProgress };
+      }
     },
-    [llm]
+    [llm, loadingProgress]
   );
 
-  return { sendMessage };
+  return { sendMessage, loadingProgress };
 }
 
 // 3. Event recommendation (sort by importance)
-export async function recommendEvents(
-  llm: webllm.MLCEngineInterface,
-  events: { id: string; title: string }[]
-): Promise<string[]> {
-  const list = events.map(e => `- ID: ${e.id}, Title: ${e.title}`).join("\n");
-  const prompt = `Given the following events with IDs and titles, rank them by importance from highest to lowest and return only a JSON array of IDs:\n${list}`;
-  const result = await llm.chat.completions.create({
-    messages: [{ role: "system", content: prompt }],
-    model: MODEL_ID,
-    stream: false,
-  });
-  // Expect result.choices[0].message.content to be a JSON array
-  if (!result.choices[0].message || !result.choices[0].message.content) {
-    throw new Error("Unexpected response format from LLM");
-  }
-  return JSON.parse(result.choices[0].message.content);
+export function useRecommendEvents() {
+  const { llm, loadingProgress } = useLLM();
+
+  const recommendEvents = useCallback(
+    async (events: { id: string; title: string }[]): Promise<{ result: string[] | null; loadingProgress: number }> => {
+      if (!llm) {
+        return { result: null, loadingProgress };
+      }
+
+      try {
+        const list = events.map(e => `- ID: ${e.id}, Title: ${e.title}`).join("\n");
+        const prompt = `Given the following events with IDs and titles, rank them by importance from highest to lowest and return only a JSON array of IDs:\n${list}`;
+        const result = await llm.chat.completions.create({
+          messages: [{ role: "system", content: prompt }],
+          model: MODEL_ID,
+          stream: false,
+        });
+        if (!result.choices[0].message || !result.choices[0].message.content) {
+          return { result: null, loadingProgress: 100 };
+        }
+        return { result: JSON.parse(result.choices[0].message.content), loadingProgress: 100 };
+      } catch (error) {
+        console.error("Error recommending events:", error);
+        return { result: null, loadingProgress };
+      }
+    },
+    [llm, loadingProgress]
+  );
+
+  return { recommendEvents, loadingProgress };
 }
