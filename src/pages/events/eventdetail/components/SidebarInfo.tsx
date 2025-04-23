@@ -1,77 +1,53 @@
-import { ProCard } from '@ant-design/pro-components';
-import { Avatar, Button, Flex, Space, Tag, Typography } from 'antd';
-import React from 'react';
+import { Flex } from 'antd';
+import React, { useState } from 'react';
 import { EventData } from '../types';
-
-const { Text } = Typography;
+import AssigneesCard from './AssigneesCard';
+import LabelsCard from './LabelsCard';
+import MilestoneCard from './MilestoneCard';
+import NotificationCard from './NotificationCard';
+import ParticipantsCard from './ParticipantsCard';
+import ProjectsCard from './ProjectsCard';
+import TypeCard from './TypeCard';
 
 // 侧边栏信息组件
 const SidebarInfo: React.FC<{ event: EventData }> = ({ event }) => {
+  // 状态管理
+  const [selectedAssignees, setSelectedAssignees] = useState<string[]>(event.assignees || []);
+  const [selectedLabels, setSelectedLabels] = useState<string[]>(event.labels || []);
+  const [selectedType, setSelectedType] = useState<string>(event.type || '');
+  const [selectedProject, setSelectedProject] = useState<string>(event.project || '');
+  const [selectedMilestone, setSelectedMilestone] = useState<string>(event.milestone || '');
+
   return (
     <Flex vertical gap={16} style={{ width: 300 }}>
-      <ProCard title="Assignees" bordered>
-        {event.assignees && event.assignees.length > 0 ? (
-          <Space>
-            {event.assignees.map((assignee, index) => (
-              <Text key={index}>{assignee}</Text>
-            ))}
-          </Space>
-        ) : (
-          <Text type="secondary">No one assigned</Text>
-        )}
-      </ProCard>
+      <AssigneesCard
+        selectedAssignees={selectedAssignees}
+        setSelectedAssignees={setSelectedAssignees}
+      />
 
-      <ProCard title="Labels" bordered>
-        {event.labels && event.labels.length > 0 ? (
-          <Space>
-            {event.labels.map((label, index) => (
-              <Tag color="magenta" key={index}>{label}</Tag>
-            ))}
-          </Space>
-        ) : (
-          <Text type="secondary">No labels</Text>
-        )}
-      </ProCard>
+      <LabelsCard
+        selectedLabels={selectedLabels}
+        setSelectedLabels={setSelectedLabels}
+      />
 
-      <ProCard title="Type" bordered>
-        {event.type ? (
-          <Text>{event.type}</Text>
-        ) : (
-          <Text type="secondary">No type</Text>
-        )}
-      </ProCard>
+      <TypeCard
+        selectedType={selectedType}
+        setSelectedType={setSelectedType}
+      />
 
-      <ProCard title="Projects" bordered>
-        {event.project ? (
-          <Text>{event.project}</Text>
-        ) : (
-          <Text type="secondary">No projects</Text>
-        )}
-      </ProCard>
+      <ProjectsCard
+        selectedProject={selectedProject}
+        setSelectedProject={setSelectedProject}
+      />
 
-      <ProCard title="Milestone" bordered>
-        {event.milestone ? (
-          <Text>Due date: {event.milestone}</Text>
-        ) : (
-          <Text type="secondary">No milestone</Text>
-        )}
-      </ProCard>
+      <MilestoneCard
+        selectedMilestone={selectedMilestone}
+        setSelectedMilestone={setSelectedMilestone}
+      />
 
-      <ProCard title="Notification" bordered>
-        <Button type="primary" block>
-          Subscribe
-        </Button>
-        <Text type="secondary">You're not receiving notifications from this thread.</Text>
-      </ProCard>
+      <NotificationCard />
 
-      <ProCard title="Participants" bordered>
-        <Avatar.Group maxCount={5}>
-          <Avatar src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Janice" />
-          <Avatar>K</Avatar>
-          <Avatar>R</Avatar>
-          <Avatar style={{ backgroundColor: '#87d068' }}>+2</Avatar>
-        </Avatar.Group>
-      </ProCard>
+      <ParticipantsCard />
     </Flex>
   );
 };
