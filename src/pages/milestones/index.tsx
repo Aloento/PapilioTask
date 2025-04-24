@@ -18,7 +18,7 @@ export const initialMilestones: Milestone[] = [
     closed: 1387,
     updatedMinutesAgo: 5,
     description:
-      'Preview, Release Candidates (RC), and General Availability (GA) releases for .NET 10',
+      'Preview, Release Candidates (RC), and General Availability (GA) releases',
   },
   {
     id: '2',

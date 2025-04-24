@@ -30,7 +30,7 @@ const mockMilestones: Milestone[] = [
     closed: 1387,
     updatedDaysAgo: 2,
     closedOn: 'Mar 6',
-    description: 'Release Candidates for .NET 10',
+    description: 'Release Candidates',
     issues: [
       {
         id: '#114793',
