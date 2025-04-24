@@ -30,7 +30,7 @@ import { ColumnItem, EventItem, ScheduleItem } from './types';
 
 const { Title } = Typography;
 
-// 主页面组件
+// Main page componentpage component
 const EventSchedulePage: React.FC = () => {
   const navigate = useNavigate();
   const [columnModalVisible, setColumnModalVisible] = useState(false);
@@ -42,7 +42,7 @@ const EventSchedulePage: React.FC = () => {
   const [searchValue, setSearchValue] = useState('');
   const [filteredData, setFilteredData] = useState<EventItem[]>([]);
 
-  // 获取事件列表数据
+  // Fetch event list dataent list data
   useEffect(() => {
     fetchEventList().then((res) => {
       setTableData(res);
@@ -50,7 +50,7 @@ const EventSchedulePage: React.FC = () => {
     });
   }, []);
 
-  // 定义表格列
+  // Define table columnse table columns
   const getInitialColumns = (): ColumnItem[] => [
     {
       title: 'Event Number',
@@ -153,7 +153,7 @@ const EventSchedulePage: React.FC = () => {
     Record<string, 'left' | 'right' | undefined>
   >({});
 
-  // 今日日程数据
+  // Today's schedule datas schedule data
   const scheduleData: ScheduleItem[] = [
     {
       key: '1',
@@ -171,15 +171,15 @@ const EventSchedulePage: React.FC = () => {
     },
   ];
 
-  // 刷新表格数据
+  // Refresh table datah table data
   const handleRefresh = () => setTableData([...tableData]);
 
-  // 处理表格密度变更
+  // Handle table density changeable density change
   const handleDensityChange = ({ key }: { key: string }) => {
     setTableSize(key as SizeType);
   };
 
-  // 处理表格列的显示和固定状态
+  // Handle table column visibility and fixed statecolumn visibility and fixed state
   const displayedColumns = useMemo(() => {
     const left: ColumnItem[] = [],
       right: ColumnItem[] = [],
@@ -195,16 +195,16 @@ const EventSchedulePage: React.FC = () => {
     return [...left, ...normal, ...right];
   }, [visibleColumnKeys, columnFixedState, columns]);
 
-  // 密度调整菜单
+  // Density adjustment menuy adjustment menu
   const densityMenu = (
     <Menu onClick={handleDensityChange} selectedKeys={[tableSize!]}>
-      <Menu.Item key="default">默认</Menu.Item>
-      <Menu.Item key="middle">中等</Menu.Item>
-      <Menu.Item key="small">紧凑</Menu.Item>
+      <Menu.Item key="default">Default</Menu.Item>
+      <Menu.Item key="middle">Medium</Menu.Item>
+      <Menu.Item key="small">Compact</Menu.Item>
     </Menu>
   );
 
-  // 创建新事件
+  // Create new evente new event
   const handleCreateEvent = (values: any) => {
     const newKey = Date.now();
     const newEventNumber = `EVT-${1000 + tableData.length + 1}`;
@@ -231,7 +231,7 @@ const EventSchedulePage: React.FC = () => {
     setIsEventModalVisible(false);
   };
 
-  // 搜索事件
+  // Search eventsch events
   const handleSearch = (value: string) => {
     const lower = value.toLowerCase();
     const filtered = tableData.filter((item) =>
@@ -264,15 +264,15 @@ const EventSchedulePage: React.FC = () => {
               Add Event
             </Button>
             <Button type="primary">Export</Button>
-            <Tooltip title="刷新">
+            <Tooltip title="Refresh">
               <Button icon={<ReloadOutlined />} onClick={handleRefresh} />
             </Tooltip>
             <Dropdown overlay={densityMenu} trigger={['click']}>
-              <Tooltip title="密度">
+              <Tooltip title="Density">
                 <Button icon={<ColumnHeightOutlined />} />
               </Tooltip>
             </Dropdown>
-            <Tooltip title="列设置">
+            <Tooltip title="Column Settings">
               <Button icon={<SettingOutlined />} onClick={() => setColumnModalVisible(true)} />
             </Tooltip>
           </Space>
