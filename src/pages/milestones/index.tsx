@@ -1,35 +1,12 @@
-import { Form, Typography } from 'antd';
-import React, { useMemo, useState } from 'react';
+import { Form, Typography, message } from 'antd';
+import React, { useEffect, useMemo, useState } from 'react';
 import AddMilestoneModal from './components/AddMilestoneModal';
 import MilestoneFilters from './components/MilestoneFilters';
 import MilestoneItem from './components/MilestoneItem';
+import { createMilestone, deleteMilestone, getMilestones, updateMilestone } from './service';
 import { Event, Milestone } from './types';
 
 const { Text } = Typography;
-
-// Initial data
-export const initialMilestones: Milestone[] = [
-  {
-    id: '1',
-    title: '10.0.0',
-    status: 'open',
-    percent: 48,
-    open: 1451,
-    closed: 1387,
-    updatedMinutesAgo: 5,
-    description:
-      'Preview, Release Candidates (RC), and General Availability (GA) releases',
-  },
-  {
-    id: '2',
-    title: 'Future',
-    status: 'open',
-    percent: 50,
-    open: 6570,
-    closed: 6788,
-    updatedHoursAgo: 2,
-  },
-];
 
 export const events: Event[] = [
   { id: 1, name: 'Sample Event', status: 'Ongoing' },
@@ -37,51 +14,123 @@ export const events: Event[] = [
   { id: 3, name: 'Legacy Phase-out', status: 'Finished' },
 ];
 
-// Main component
 const MilestonesPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'open' | 'closed'>('open');
   const [searchText, setSearchText] = useState('');
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [milestoneList, setMilestoneList] = useState<Milestone[]>(initialMilestones);
+  const [milestoneList, setMilestoneList] = useState<Milestone[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(null);
   const [form] = Form.useForm();
 
-  const handleAddMilestone = () => {
-    form.validateFields().then((values) => {
-      // Generate unique ID
-      const newId = `milestone-${Date.now()}`;
-      const selectedEvent = events.find((e) => e.id === values.eventId);
+  const fetchMilestones = async () => {
+    setLoading(true);
+    try {
+      const data = await getMilestones({
+        status: statusFilter,
+        query: searchText
+      });
+      setMilestoneList(Array.isArray(data) ? data : []);
+    } catch (error) {
+      message.error('获取里程碑列表失败');
+      setMilestoneList([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      const newMilestone: Milestone = {
-        id: newId,
-        title: values.name,
-        status: 'open',
-        percent: 0,
-        open: 0,
-        closed: 0,
-        updatedMinutesAgo: 0,
-        eventId: values.eventId,
-        description: values.description ||
-          `Associated event: ${selectedEvent?.name || 'Not specified'}`,
-      };
+  useEffect(() => {
+    fetchMilestones();
+  }, [statusFilter, searchText]);
 
-      setMilestoneList([newMilestone, ...milestoneList]);
+  const handleEditMilestone = (milestone: Milestone) => {
+    setEditingMilestone(milestone);
+    setIsModalVisible(true);
+    form.setFieldsValue({
+      name: milestone.title,
+      description: milestone.description,
+      eventId: milestone.eventId,
+    });
+  };
+
+  const handleDeleteMilestone = async (milestone: Milestone) => {
+    try {
+      await deleteMilestone(Number(milestone.id));
+      message.success('里程碑删除成功');
+      fetchMilestones();
+    } catch (error) {
+      message.error('删除失败');
+    }
+  };
+
+  const handleSaveMilestone = async (values: any) => {
+    try {
+      if (editingMilestone) {
+        await updateMilestone(Number(editingMilestone.id), {
+          title: values.name,
+          description: values.description,
+          eventId: values.eventId,
+        });
+        message.success('里程碑更新成功');
+      } else {
+        await createMilestone({
+          title: values.name,
+          description: values.description,
+          eventId: values.eventId,
+          status: 'open',
+        });
+        message.success('里程碑创建成功');
+      }
       setIsModalVisible(false);
       form.resetFields();
-    });
+      setEditingMilestone(null);
+      fetchMilestones();
+    } catch (error) {
+      message.error('操作失败');
+    }
+  };
+
+  const handleAddMilestone = async () => {
+    try {
+      const values = await form.validateFields();
+      await createMilestone({
+        title: values.name,
+        description: values.description,
+        eventId: values.eventId,
+        status: 'open',
+        percent: 0,
+        openCount: 0,
+        closedCount: 0
+      });
+      message.success('创建里程碑成功');
+      setIsModalVisible(false);
+      form.resetFields();
+      fetchMilestones(); // 刷新列表
+    } catch (error) {
+      message.error('创建里程碑失败');
+    }
   };
 
   const filteredMilestones = useMemo(
     () =>
-      milestoneList.filter(
-        (m) =>
-          m.status === statusFilter &&
-          m.title.toLowerCase().includes(searchText.toLowerCase())
-      ),
-    [statusFilter, searchText, milestoneList]
+      Array.isArray(milestoneList)
+        ? milestoneList.filter((m) => {
+          if (!m || typeof m.title !== 'string') return false;
+          return (
+            m.status === statusFilter &&
+            (searchText
+              ? m.title.toLowerCase().includes(searchText.toLowerCase())
+              : true)
+          );
+        })
+        : [],
+    [milestoneList, statusFilter, searchText]
   );
 
-  const openCount = milestoneList.filter((m) => m.status === 'open').length;
-  const closedCount = milestoneList.filter((m) => m.status === 'closed').length;
+  const openCount = (Array.isArray(milestoneList) ? milestoneList : [])
+    .filter((m) => m?.status === 'open').length;
+  const closedCount = (Array.isArray(milestoneList) ? milestoneList : [])
+    .filter((m) => m?.status === 'closed').length;
 
   return (
     <div style={{ padding: 24 }}>
@@ -102,6 +151,8 @@ const MilestonesPage: React.FC = () => {
               key={milestone.id || milestone.title}
               milestone={milestone}
               index={index}
+              onEdit={handleEditMilestone}
+              onDelete={handleDeleteMilestone}
             />
           ))
         ) : (
@@ -113,10 +164,14 @@ const MilestonesPage: React.FC = () => {
 
       <AddMilestoneModal
         visible={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
+        onCancel={() => {
+          setIsModalVisible(false);
+          form.resetFields();
+        }}
         onSubmit={handleAddMilestone}
         form={form}
         events={events}
+        editingMilestone={editingMilestone}
       />
     </div>
   );

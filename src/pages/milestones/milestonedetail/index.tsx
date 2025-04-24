@@ -2,7 +2,7 @@ import {
   LeftOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
-import { history, useParams } from '@umijs/max';
+import { history, useParams, useRequest } from '@umijs/max';
 import {
   Button,
   Col,
@@ -12,58 +12,75 @@ import {
   Row,
   Typography,
 } from 'antd';
-import React, { useMemo, useState } from 'react';
-import CreateEventForm from './components/CreateEventForm';
-import IssuesList from './components/IssuesList';
+import React, { useEffect, useMemo, useState } from 'react';
+import AddEventForm from './components/AddEventForm';
+import EventList from './components/EventList';
 import MilestoneHeader from './components/MilestoneHeader';
 import MilestoneTabs from './components/MilestoneTabs';
-import { Issue, Milestone } from './types';
+import { addEventToMilestone, fetchAvailableEvents, fetchMilestoneDetail } from './service';
+import { Event, Milestone } from './types';
 
 const { Text } = Typography;
-
-const mockMilestones: Milestone[] = [
-  {
-    title: '10.0.0',
-    status: 'closed',
-    percent: 48,
-    open: 1451,
-    closed: 1387,
-    updatedDaysAgo: 2,
-    closedOn: 'Mar 6',
-    description: 'Release Candidates',
-    issues: [
-      {
-        id: '#1',
-        title: '[API Proposal]: VectorData.Abstractions',
-        labels: ['api-suggestion', 'blocking'],
-        author: 'jeffhandley',
-        time: '5 minutes ago',
-        comments: 1,
-      },
-    ],
-  },
-];
-
-const eventNumbers = ['EVT-001', 'EVT-002', 'EVT-003'];
-const eventNames = ['Marketing Sync', 'Design Review', 'Product Launch'];
 
 const MilestoneDetailPage: React.FC = () => {
   const { title } = useParams();
   const [tab, setTab] = useState<'open' | 'closed'>('open');
   const [modalVisible, setModalVisible] = useState(false);
+  const [milestone, setMilestone] = useState<Milestone | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [eventList, setEventList] = useState<Event[]>([]);
   const [form] = Form.useForm();
+  const [events, setEvents] = useState<{ label: string; value: string }[]>([]);
 
-  const milestone = mockMilestones.find(
-    (m) =>
-      decodeURIComponent(m.title).toLowerCase() ===
-      (title || '').toLowerCase()
+  const fetchData = async () => {
+    if (!title) return;
+    setLoading(true);
+    try {
+      const data = await fetchMilestoneDetail(decodeURIComponent(title));
+      setMilestone(data);
+    } catch (error) {
+      message.error('Failed to fetch milestone details');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [title]);
+
+  useEffect(() => {
+    if (milestone) {
+      setEventList(milestone.events || []);
+    }
+  }, [milestone]);
+
+  const eventsFiltered = useMemo(() => {
+    return eventList.filter((e) => {
+      if (tab === 'open') {
+        return e.labels.includes('Pending') || e.labels.includes('Ongoing');
+      }
+      return e.labels.includes('Finished');
+    });
+  }, [eventList, tab]);
+
+  const { data: eventsList, loading: eventsLoading } = useRequest(
+    () => fetchAvailableEvents(decodeURIComponent(title || '')),
+    {
+      refreshDeps: [title],
+      formatResult: (res) => res.data
+    }
   );
 
-  const [issueList, setIssueList] = useState(milestone?.issues || []);
+  useEffect(() => {
+    if (eventsList) {
+      setEvents(eventsList);
+    }
+  }, [eventsList]);
 
-  const issues = useMemo(() => {
-    return issueList.filter((i) => (tab === 'open' ? true : false));
-  }, [issueList, tab]);
+  if (loading) {
+    return <div style={{ padding: 24 }}>Loading...</div>;
+  }
 
   if (!milestone) {
     return (
@@ -76,22 +93,16 @@ const MilestoneDetailPage: React.FC = () => {
   const handleCreateEvent = async () => {
     try {
       const values = await form.validateFields();
+      console.log('选中的事件:', values.eventNumber);
 
-      const newIssue: Issue = {
-        id: `#${Math.floor(Math.random() * 1000000)}`,
-        title: `${values.eventNumber} - ${values.eventName}`,
-        labels: ['new'],
-        author: 'admin',
-        time: 'just now',
-        comments: 0,
-      };
-
-      setIssueList((prev) => [newIssue, ...prev]);
-      message.success('Task created successfully!');
+      await addEventToMilestone(decodeURIComponent(title || ''), values.eventNumber);
+      message.success('事件添加成功！');
       form.resetFields();
       setModalVisible(false);
+      fetchData();
     } catch (err) {
-      console.log(err);
+      console.error('添加事件失败:', err);
+      message.error('添加事件失败');
     }
   };
 
@@ -131,20 +142,24 @@ const MilestoneDetailPage: React.FC = () => {
         closedCount={milestone.closed}
       />
 
-      {/* 问题列表 */}
-      <IssuesList issues={issues} />
+      {/* 事件列表 */}
+      <EventList events={eventsFiltered} />
 
       {/* 创建事件模态框 */}
       <Modal
         open={modalVisible}
-        title="Create New Event"
+        title="Add Event to Milestone"
         onCancel={() => setModalVisible(false)}
         onOk={handleCreateEvent}
-        okText="Create"
+        okText="Add"
         cancelText="Cancel"
         width={480}
       >
-        <CreateEventForm form={form} eventNumbers={eventNumbers} eventNames={eventNames} />
+        <AddEventForm
+          form={form}
+          events={events}
+          loading={eventsLoading}
+        />
       </Modal>
     </div>
   );

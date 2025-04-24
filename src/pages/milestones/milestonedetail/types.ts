@@ -1,4 +1,4 @@
-export interface Issue {
+export interface Event {
   id: string;
   title: string;
   labels: string[];
@@ -13,8 +13,10 @@ export interface Milestone {
   percent: number;
   open: number;
   closed: number;
-  updatedDaysAgo: number;
-  closedOn: string;
+  updatedDaysAgo?: number;
+  updatedHoursAgo?: number;
+  updatedMinutesAgo?: number;
+  closedOn?: string;
   description: string;
-  issues: Issue[];
+  events: Event[];
 }

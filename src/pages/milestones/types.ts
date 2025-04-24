@@ -5,6 +5,9 @@ export interface Milestone {
   percent: number;
   open: number;
   closed: number;
+  dueDate?: string;
+  createdAt?: string;
+  updatedAt?: string;
   updatedMinutesAgo?: number;
   updatedHoursAgo?: number;
   updatedDaysAgo?: number;
