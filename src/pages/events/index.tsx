@@ -125,7 +125,7 @@ const EventSchedulePage: React.FC = () => {
 
   // 创建新事件
   const handleCreateEvent = (values: any) => {
-    const newKey = Date.now();
+    const newKey = "1";
     const newEventNumber = `EVT-${1000 + tableData.length + 1}`;
 
     const newItem: EventItem = {
