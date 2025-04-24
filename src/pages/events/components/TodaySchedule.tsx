@@ -9,7 +9,6 @@ interface ScheduleItem {
   title: string;
   time: string;
   urgent: boolean;
-  url: string;
 }
 
 // 日程组件
@@ -30,7 +29,7 @@ const TodaySchedule: React.FC<{ data: ScheduleItem[] }> = ({ data }) => {
             )}
             <div>
               <Link onClick={() => navigate(`/events/eventdetail/${item.key}`)}>
-                {item.url}
+                View Details
               </Link>
             </div>
           </Col>

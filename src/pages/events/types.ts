@@ -14,7 +14,6 @@ export interface ScheduleItem {
   title: string;
   time: string;
   urgent: boolean;
-  url: string;
 }
 
 export interface ColumnItem {

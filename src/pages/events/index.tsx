@@ -91,14 +91,12 @@ const EventSchedulePage: React.FC = () => {
       title: 'The curse of revision - Hermione',
       time: '2025/03/05 – 2025/03/12',
       urgent: true,
-      url: 'www.revision.com',
     },
     {
       key: '2',
       title: 'Meeting - Sponsor of the meeting: Tom',
       time: '2025/03/05 12:00 – 15:00',
       urgent: true,
-      url: 'www.revision.com',
     },
   ];
 
