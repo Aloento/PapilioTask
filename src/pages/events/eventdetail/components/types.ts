@@ -1,43 +1,34 @@
-
 // 活动项类型定义
-export type ActivityItem = {
+export interface ActivityItem {
   id: string;
-  type: 'system' | 'comment';
+  type: 'comment' | 'system' | 'update';
   content: string;
   user: string;
   timestamp: string;
-  title?: string;
-};
+  createdAt?: Date | string;
+}
 
 // 示例活动数据
 export const sampleActivities: ActivityItem[] = [
   {
     id: '1',
     type: 'system',
-    content: 'changed status from "Open" to "In Progress"',
-    user: 'System',
-    timestamp: '2023-07-15 10:30',
+    content: 'created this event',
+    user: 'Admin',
+    timestamp: '2023-06-10 14:30:00',
   },
   {
     id: '2',
     type: 'comment',
-    content: 'I think we should consider refactoring this part of the code.',
+    content: 'This event needs to be prioritized.',
     user: 'Tom',
-    timestamp: '2023-07-15 11:45',
+    timestamp: '2023-06-10 15:45:00',
   },
   {
     id: '3',
     type: 'system',
-    content: 'added label',
-    user: 'Jerry',
-    timestamp: '2023-07-16 09:22',
-    title: 'bug',
-  },
-  {
-    id: '4',
-    type: 'comment',
-    content: 'Let me take a look at this issue this afternoon.',
-    user: 'Harry',
-    timestamp: '2023-07-16 14:15',
+    content: 'changed status to Doing',
+    user: 'Hermione',
+    timestamp: '2023-06-11 09:15:00',
   },
 ];

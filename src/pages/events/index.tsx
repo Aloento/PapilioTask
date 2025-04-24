@@ -16,16 +16,16 @@ import {
   Tag,
   Tooltip,
   Typography,
+  message,
 } from 'antd';
 import { SizeType } from 'antd/es/config-provider/SizeContext';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AddEventButton from './components/AddEventButton';
 import ColumnSettingModal from './components/ColumnSettingModal';
 import CreateEventModal from './components/CreateEventModal';
 import NotificationCard from './components/NotificationCard';
 import TodaySchedule from './components/TodaySchedule';
-import { fetchEventList } from './service';
+import { deleteEvent, fetchEventList, fetchTodaySchedule } from './service';
 import { ColumnItem, EventItem, ScheduleItem } from './types';
 
 const { Title } = Typography;
@@ -41,6 +41,7 @@ const EventSchedulePage: React.FC = () => {
   const [filteredData, setFilteredData] = useState<EventItem[]>([]);
   const [tableSize, setTableSize] = useState<SizeType>('middle');
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [loading, setLoading] = useState(false);
 
   // 搜索相关状态
   const [searchValue, setSearchValue] = useState('');
@@ -48,6 +49,16 @@ const EventSchedulePage: React.FC = () => {
   // 模态框显示状态
   const [columnModalVisible, setColumnModalVisible] = useState(false);
   const [isEventModalVisible, setIsEventModalVisible] = useState(false);
+
+  // 分页状态
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
+
+  // 今日日程数据
+  const [scheduleData, setScheduleData] = useState<ScheduleItem[]>([]);
 
   // 列设置状态
   const columns = useMemo(() => getInitialColumns(navigate), [navigate]);
@@ -59,11 +70,34 @@ const EventSchedulePage: React.FC = () => {
   >({});
 
   // 获取事件列表数据
-  useEffect(() => {
-    fetchEventList().then((res) => {
+  const fetchEvents = async () => {
+    setLoading(true);
+    try {
+      const res = await fetchEventList();
       setTableData(res);
       setFilteredData(res);
-    });
+      setPagination(prev => ({ ...prev, total: res.length }));
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      message.error('Failed to fetch events');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 获取今日日程
+  const fetchSchedule = async () => {
+    try {
+      const res = await fetchTodaySchedule();
+      setScheduleData(res);
+    } catch (error) {
+      console.error('Error fetching today schedule:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+    fetchSchedule();
   }, []);
 
   // 计算当前应显示的列
@@ -84,22 +118,6 @@ const EventSchedulePage: React.FC = () => {
     return [...left, ...normal, ...right];
   }, [visibleColumnKeys, columnFixedState, columns]);
 
-  // 今日日程数据
-  const scheduleData: ScheduleItem[] = [
-    {
-      key: '1',
-      title: 'The curse of revision - Hermione',
-      time: '2025/03/05 – 2025/03/12',
-      urgent: true,
-    },
-    {
-      key: '2',
-      title: 'Meeting - Sponsor of the meeting: Tom',
-      time: '2025/03/05 12:00 – 15:00',
-      urgent: true,
-    },
-  ];
-
   // 密度调整菜单
   const densityMenu = (
     <Menu onClick={({ key }) => setTableSize(key as SizeType)} selectedKeys={[tableSize!]}>
@@ -110,7 +128,10 @@ const EventSchedulePage: React.FC = () => {
   );
 
   // 刷新表格数据
-  const handleRefresh = () => setTableData([...tableData]);
+  const handleRefresh = () => {
+    fetchEvents();
+    fetchSchedule();
+  };
 
   // 搜索事件
   const handleSearch = (value: string) => {
@@ -122,35 +143,72 @@ const EventSchedulePage: React.FC = () => {
   };
 
   // 创建新事件
-  const handleCreateEvent = (values: any) => {
-    const newKey = "1";
-    const newEventNumber = `EVT-${1000 + tableData.length + 1}`;
-
-    const newItem: EventItem = {
-      key: newKey,
-      eventNumber: newEventNumber,
-      eventName: values.title || 'Untitled',
-      assignees: values.assignees?.join(', ') || '',
-      timeframe: values.timeframe
-        ? `${values.timeframe[0].format('YYYY/MM/DD')} - ${values.timeframe[1].format(
-          'YYYY/MM/DD',
-        )}`
-        : '',
-      labels: values.labels || [],
-      status: values.status?.length > 0 ? values.status : ['Pending'],
-    };
-
-    setTableData((prev) => {
-      const updated = [newItem, ...prev];
-      setFilteredData(updated);
-      return updated;
-    });
+  const handleCreateEvent = async (values: any) => {
+    try {
+      // 这里values已经是API返回的结果，不需要再次调用createEvent
+      setIsEventModalVisible(false);
+      message.success('Event created successfully');
+      handleRefresh(); // 刷新列表即可
+    } catch (error) {
+      console.error('Error handling event creation:', error);
+      message.error('Failed to handle event creation');
+    }
   };
+
+  // 删除选中事件
+  const handleDeleteSelected = async () => {
+    if (selectedRowKeys.length === 0) {
+      message.warning('Please select events to delete');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // 依次删除每个选中的事件
+      for (const key of selectedRowKeys) {
+        await deleteEvent(key);
+      }
+      message.success('Selected events deleted successfully');
+      setSelectedRowKeys([]);
+      handleRefresh();
+    } catch (error) {
+      console.error('Error deleting events:', error);
+      message.error('Failed to delete events');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 处理分页变化
+  const handlePaginationChange = (page: number, pageSize?: number) => {
+    setPagination(prev => ({
+      ...prev,
+      current: page,
+      pageSize: pageSize || prev.pageSize,
+    }));
+  };
+
+  // 处理每页显示数量变化
+  const handleShowSizeChange = (current: number, size: number) => {
+    setPagination(prev => ({
+      ...prev,
+      current,
+      pageSize: size,
+    }));
+  };
+
+  // 计算当前页应该显示的数据
+  const paginatedData = useMemo(() => {
+    const { current, pageSize } = pagination;
+    const start = (current - 1) * pageSize;
+    const end = start + pageSize;
+    return filteredData.slice(start, end);
+  }, [filteredData, pagination]);
 
   return (
     <div style={{ padding: 24 }}>
-      {tableData.length > 0 && (
-        <NotificationCard data={tableData[0]} />
+      {scheduleData.length > 0 && (
+        <NotificationCard data={scheduleData[0]} />
       )}
 
       <TodaySchedule data={scheduleData} />
@@ -163,10 +221,24 @@ const EventSchedulePage: React.FC = () => {
         </Col>
         <Col>
           <Space>
-            <AddEventButton onAddEvent={handleCreateEvent} />
+            <Button
+              type="primary"
+              onClick={() => setIsEventModalVisible(true)}
+            >
+              Add Event
+            </Button>
+            {selectedRowKeys.length > 0 && (
+              <Button
+                danger
+                onClick={handleDeleteSelected}
+                loading={loading}
+              >
+                Delete Selected
+              </Button>
+            )}
             <Button type="primary">Export</Button>
             <Tooltip title="Refresh">
-              <Button icon={<ReloadOutlined />} onClick={handleRefresh} />
+              <Button icon={<ReloadOutlined />} onClick={handleRefresh} loading={loading} />
             </Tooltip>
             <Dropdown overlay={densityMenu} trigger={['click']}>
               <Tooltip title="Density">
@@ -184,16 +256,25 @@ const EventSchedulePage: React.FC = () => {
         columns={displayedColumns}
         size={tableSize}
         rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
-        dataSource={filteredData}
+        dataSource={paginatedData}
         rowKey="key"
         bordered
         pagination={false}
         scroll={{ x: 'max-content' }}
+        loading={loading}
       />
 
       <Row justify="space-between" align="middle" style={{ marginTop: 16 }}>
         <Col>
-          <Pagination defaultCurrent={1} total={50} pageSize={10} showSizeChanger />
+          <Pagination
+            current={pagination.current}
+            total={filteredData.length}
+            pageSize={pagination.pageSize}
+            onChange={handlePaginationChange}
+            onShowSizeChange={handleShowSizeChange}
+            showSizeChanger
+            showTotal={(total) => `Total ${total} items`}
+          />
         </Col>
         <Col>
           <Input.Search

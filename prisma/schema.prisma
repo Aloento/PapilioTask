@@ -37,6 +37,9 @@ model User {
 
   // 与 Milestone 的关系：最后更新者
   updatedMilestones Milestone[] @relation("UserUpdatedMilestones")
+
+  // 与评论的关系
+  comments Comment[]
 }
 
 model Task {
@@ -56,13 +59,19 @@ model Event {
   id          Int      @id @default(autoincrement())
   eventNumber String   @unique
   name        String
+  description String?
   startDate   DateTime
   endDate     DateTime
-  labels      String?
-  status      String?
+  labels      String? // 存储为逗号分隔的字符串
+  status      String   @default("Pending") // 使用字符串表示状态
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   assignee   User? @relation("UserAssignedEvents", fields: [assigneeId], references: [id])
   assigneeId Int?
+
+  // 与评论的关系
+  comments Comment[]
 }
 
 model Milestone {
@@ -83,4 +92,15 @@ model Notification {
   message   String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  eventId   Int
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

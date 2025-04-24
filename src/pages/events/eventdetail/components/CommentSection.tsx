@@ -1,29 +1,46 @@
 import { usePolishText } from '@/services/llm';
 import { ProCard } from '@ant-design/pro-components';
-import { Button, Flex, Input, Select, Space, Tooltip } from 'antd';
+import { Button, Flex, Input, Select, Space, Tooltip, message } from 'antd';
 import React, { useState } from 'react';
+import { addEventComment } from '../../service';
 
 const { TextArea } = Input;
 
 interface CommentSectionProps {
+  eventId: React.Key;
   eventStatus: string;
-  onAddComment: (comment: string) => void;
+  onAddComment: (comment: any) => void;
   onChangeStatus: () => void;
 }
 
 const CommentSection: React.FC<CommentSectionProps> = ({
+  eventId,
   eventStatus,
   onAddComment,
   onChangeStatus
 }) => {
   const [comment, setComment] = useState('');
   const [isPolishing, setIsPolishing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { polishText, loadingProgress } = usePolishText();
 
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (!comment.trim()) return;
-    onAddComment(comment);
-    setComment('');
+
+    setIsSubmitting(true);
+    try {
+      // 调用API添加评论
+      const result = await addEventComment(eventId, comment);
+      // 通知父组件更新评论列表
+      onAddComment(result);
+      setComment('');
+      message.success('Comment added successfully');
+    } catch (error) {
+      console.error('Failed to add comment:', error);
+      message.error('Failed to add comment');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePolishComment = async () => {
@@ -53,7 +70,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         />
         <Flex justify="space-between">
           <Space>
-            <Button type="primary" onClick={handleAddComment}>
+            <Button
+              type="primary"
+              onClick={handleAddComment}
+              loading={isSubmitting}
+              disabled={!comment.trim()}
+            >
               Comment
             </Button>
             <Tooltip title={loadingProgress < 100 ? `模型加载中: ${loadingProgress}%` : '使用AI优化评论文本'}>
