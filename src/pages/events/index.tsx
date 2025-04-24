@@ -1,6 +1,5 @@
 import {
   ColumnHeightOutlined,
-  PlusOutlined,
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
@@ -21,6 +20,7 @@ import {
 import { SizeType } from 'antd/es/config-provider/SizeContext';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AddEventButton from './components/AddEventButton';
 import ColumnSettingModal from './components/ColumnSettingModal';
 import CreateEventModal from './components/CreateEventModal';
 import NotificationCard from './components/NotificationCard';
@@ -147,7 +147,6 @@ const EventSchedulePage: React.FC = () => {
       setFilteredData(updated);
       return updated;
     });
-    setIsEventModalVisible(false);
   };
 
   return (
@@ -166,13 +165,7 @@ const EventSchedulePage: React.FC = () => {
         </Col>
         <Col>
           <Space>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => setIsEventModalVisible(true)}
-            >
-              Add Event
-            </Button>
+            <AddEventButton onAddEvent={handleCreateEvent} />
             <Button type="primary">Export</Button>
             <Tooltip title="Refresh">
               <Button icon={<ReloadOutlined />} onClick={handleRefresh} />

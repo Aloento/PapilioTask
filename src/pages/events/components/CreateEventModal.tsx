@@ -1,5 +1,6 @@
-import { Button, Col, DatePicker, Form, Input, Modal, Row, Select, Space } from 'antd';
-import React from 'react';
+import { usePolishText } from '@/services/llm';
+import { Button, Col, DatePicker, Form, Input, Modal, Row, Select, Space, Tooltip } from 'antd';
+import React, { useState } from 'react';
 
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
@@ -10,6 +11,29 @@ const CreateEventModal: React.FC<{
   onCancel: () => void;
   onSubmit: (values: any) => void;
 }> = ({ visible, onCancel, onSubmit }) => {
+  const [form] = Form.useForm();
+  const [isPolishing, setIsPolishing] = useState(false);
+  const [description, setDescription] = useState('');
+  const { polishText, loadingProgress } = usePolishText();
+
+  const handlePolishDescription = async () => {
+    const currentDescription = form.getFieldValue('description');
+    if (!currentDescription?.trim()) return;
+
+    setIsPolishing(true);
+    try {
+      const { result } = await polishText(currentDescription);
+      if (result) {
+        form.setFieldsValue({ description: result });
+        setDescription(result);
+      }
+    } catch (error) {
+      console.error('Error polishing text:', error);
+    } finally {
+      setIsPolishing(false);
+    }
+  };
+
   return (
     <Modal
       title="Create New Event"
@@ -21,6 +45,7 @@ const CreateEventModal: React.FC<{
       <Form
         layout="vertical"
         onFinish={onSubmit}
+        form={form}
       >
         <Row gutter={32}>
           <Col span={16}>
@@ -33,8 +58,23 @@ const CreateEventModal: React.FC<{
             </Form.Item>
 
             <Form.Item label="Add a description" name="description">
-              <TextArea placeholder="Type your description here..." rows={8} />
+              <TextArea
+                placeholder="Type your description here..."
+                rows={8}
+                onChange={(e) => setDescription(e.target.value)}
+              />
             </Form.Item>
+
+            <Tooltip title={loadingProgress < 100 ? `模型加载中: ${loadingProgress}%` : '使用AI优化描述文本'}>
+              <Button
+                onClick={handlePolishDescription}
+                loading={isPolishing}
+                disabled={loadingProgress < 100 || !description.trim()}
+                icon={loadingProgress < 100 ? null : undefined}
+              >
+                {loadingProgress < 100 ? `模型加载中 ${loadingProgress}%` : 'AI润色描述'}
+              </Button>
+            </Tooltip>
 
             <Space>
               <Button onClick={onCancel}>Cancel</Button>

@@ -59,9 +59,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({
             <Tooltip title={loadingProgress < 100 ? `模型加载中: ${loadingProgress}%` : '使用AI优化评论文本'}>
               <Button
                 onClick={handlePolishComment}
-                loading={isPolishing}
+                loading={isPolishing || (loadingProgress > 0 && loadingProgress < 100)}
                 disabled={loadingProgress < 100 || !comment.trim()}
-                icon={loadingProgress < 100 ? `${loadingProgress}%` : undefined}
+                style={loadingProgress < 100 ? {
+                  background: `linear-gradient(to right, #f0f0f0 ${loadingProgress}%, white ${loadingProgress}%)`
+                } : {}}
               >
                 {loadingProgress < 100 ? `加载中 ${loadingProgress}%` : 'AI润色'}
               </Button>

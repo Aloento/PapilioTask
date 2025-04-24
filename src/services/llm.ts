@@ -74,12 +74,14 @@ export function usePolishText() {
       }
 
       try {
-        const prompt = `You are a professional editor. Please rewrite the following text to be clearer and more polished without adding any extra AI commentary:\n\n${input}`;
         const result = await llm.chat.completions.create({
-          messages: [{ role: "system", content: prompt }],
+          messages: [
+            { role: "system", content: "You are a professional editor. Please rewrite text to be clearer and more polished without adding any extra AI commentary." },
+            { role: "user", content: input }
+          ],
           model: MODEL_ID,
           stream: false,
-          temperature: 0.2,
+          temperature: 0,
           presence_penalty: -1,
           frequency_penalty: 1
         });
@@ -150,7 +152,7 @@ export function useRecommendEvents() {
           messages: [{ role: "system", content: prompt }],
           model: MODEL_ID,
           stream: false,
-          temperature: 0.2,
+          temperature: 0,
           presence_penalty: -1,
           frequency_penalty: 1
         });
