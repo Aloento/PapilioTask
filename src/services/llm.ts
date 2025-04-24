@@ -79,6 +79,9 @@ export function usePolishText() {
           messages: [{ role: "system", content: prompt }],
           model: MODEL_ID,
           stream: false,
+          temperature: 0.2,
+          presence_penalty: -1,
+          frequency_penalty: 1
         });
         if (!result.choices[0].message || !result.choices[0].message.content) {
           return { result: null, loadingProgress: 100 };
@@ -114,6 +117,9 @@ export function usePapilioChat() {
           messages: messages.map(msg => ({ role: msg.role as "system" | "user" | "assistant", content: msg.content })),
           model: MODEL_ID,
           stream: true,
+          temperature: 0.2,
+          presence_penalty: -1,
+          frequency_penalty: 1
         });
         return { stream, loadingProgress: 100 };
       } catch (error) {
@@ -144,6 +150,9 @@ export function useRecommendEvents() {
           messages: [{ role: "system", content: prompt }],
           model: MODEL_ID,
           stream: false,
+          temperature: 0.2,
+          presence_penalty: -1,
+          frequency_penalty: 1
         });
         if (!result.choices[0].message || !result.choices[0].message.content) {
           return { result: null, loadingProgress: 100 };
