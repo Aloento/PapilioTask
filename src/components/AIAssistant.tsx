@@ -160,7 +160,9 @@ const AIAssistant: React.FC = () => {
               {messages.length === 0 ? (
                 <div className="empty-chat-message">
                   <Typography.Text type="secondary">
-                    Hello! I am PapilioTask AI Assistant. How can I assist you?
+                    Hello! I am PapilioTask AI Assistant.
+                    <br />
+                    How can I assist you?
                   </Typography.Text>
                 </div>
               ) : (
