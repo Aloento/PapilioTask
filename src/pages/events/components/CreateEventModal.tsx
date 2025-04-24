@@ -22,11 +22,11 @@ const CreateEventModal: React.FC<{
 
     setIsPolishing(true);
     try {
-      const { result } = await polishText(currentDescription);
-      if (result) {
-        form.setFieldsValue({ description: result });
-        setDescription(result);
-      }
+      // 使用流式处理，提供实时更新的回调函数
+      await polishText(currentDescription, (updatedText) => {
+        form.setFieldsValue({ description: updatedText });
+        setDescription(updatedText);
+      });
     } catch (error) {
       console.error('Error polishing text:', error);
     } finally {
@@ -72,7 +72,7 @@ const CreateEventModal: React.FC<{
                 disabled={loadingProgress < 100 || !description.trim()}
                 icon={loadingProgress < 100 ? null : undefined}
               >
-                {loadingProgress < 100 ? `模型加载中 ${loadingProgress}%` : 'AI润色描述'}
+                {isPolishing ? "正在润色..." : loadingProgress < 100 ? `模型加载中 ${loadingProgress}%` : 'AI润色描述'}
               </Button>
             </Tooltip>
 

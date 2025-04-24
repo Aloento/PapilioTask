@@ -68,27 +68,39 @@ export function usePolishText() {
   const { llm, loadingProgress } = useLLM();
 
   const polishText = useCallback(
-    async (input: string): Promise<{ result: string | null; loadingProgress: number }> => {
+    async (input: string, onUpdate?: (text: string) => void): Promise<{ result: string | null; loadingProgress: number }> => {
       if (!llm) {
         return { result: null, loadingProgress };
       }
 
       try {
-        const result = await llm.chat.completions.create({
+        // 创建流式请求
+        const stream = await llm.chat.completions.create({
           messages: [
             { role: "system", content: "You are a professional editor. Please rewrite text to be clearer and more polished without adding any extra AI commentary." },
             { role: "user", content: input }
           ],
           model: MODEL_ID,
-          stream: false,
+          stream: true, // 启用流式响应
           temperature: 0,
           presence_penalty: -1,
           frequency_penalty: 1
         });
-        if (!result.choices[0].message || !result.choices[0].message.content) {
-          return { result: null, loadingProgress: 100 };
+
+        let fullText = "";
+
+        // 处理流式响应
+        for await (const chunk of stream) {
+          const content = chunk.choices[0]?.delta?.content || "";
+          fullText += content;
+
+          // 如果提供了更新回调，则调用它
+          if (onUpdate && content) {
+            onUpdate(fullText);
+          }
         }
-        return { result: result.choices[0].message.content.trim(), loadingProgress: 100 };
+
+        return { result: fullText.trim(), loadingProgress: 100 };
       } catch (error) {
         console.error("Error polishing text:", error);
         return { result: null, loadingProgress };

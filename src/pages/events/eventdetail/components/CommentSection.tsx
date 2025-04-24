@@ -31,10 +31,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     setIsPolishing(true);
 
     try {
-      const { result } = await polishText(comment);
-      if (result) {
-        setComment(result);
-      }
+      // 使用流式处理，提供实时更新的回调函数
+      await polishText(comment, (updatedText) => {
+        setComment(updatedText);
+      });
     } catch (error) {
       console.error('Error polishing text:', error);
     } finally {
@@ -59,13 +59,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({
             <Tooltip title={loadingProgress < 100 ? `模型加载中: ${loadingProgress}%` : '使用AI优化评论文本'}>
               <Button
                 onClick={handlePolishComment}
-                loading={isPolishing || (loadingProgress > 0 && loadingProgress < 100)}
+                loading={isPolishing}
                 disabled={loadingProgress < 100 || !comment.trim()}
                 style={loadingProgress < 100 ? {
                   background: `linear-gradient(to right, #f0f0f0 ${loadingProgress}%, white ${loadingProgress}%)`
                 } : {}}
               >
-                {loadingProgress < 100 ? `加载中 ${loadingProgress}%` : 'AI润色'}
+                {isPolishing ? "正在润色..." : loadingProgress < 100 ? `模型加载中 ${loadingProgress}%` : 'AI润色评论'}
               </Button>
             </Tooltip>
             <Select
