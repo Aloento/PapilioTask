@@ -33,7 +33,7 @@ const mockMilestones: Milestone[] = [
     description: 'Release Candidates',
     issues: [
       {
-        id: '#114793',
+        id: '#1',
         title: '[API Proposal]: VectorData.Abstractions',
         labels: ['api-suggestion', 'blocking'],
         author: 'jeffhandley',
